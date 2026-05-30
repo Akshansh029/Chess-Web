@@ -17,13 +17,15 @@ public class GameSession {
     private UUID id;
     private UUID whitePlayerId;
     private UUID blackPlayerId;
+    private String whitePlayerName;
+    private String blackPlayerName;
     private GameStatus status;
     private GameResult result;
     private GameTerminationReason terminationReason;
-    private String pgn;
-    private int totalMoves;
+//    private String pgn;
+//    private int totalMoves;
+//    private Instant endedAt;
     private Instant startedAt;
-    private Instant endedAt;
 
     private String currentFen;
     private Color currentTurn;
