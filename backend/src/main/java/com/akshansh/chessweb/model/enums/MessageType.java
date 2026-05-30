@@ -1,4 +1,4 @@
-package com.akshansh.chessweb.model;
+package com.akshansh.chessweb.model.enums;
 
 public enum MessageType {
     CHAT,

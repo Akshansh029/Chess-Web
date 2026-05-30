@@ -1,7 +1,7 @@
 package com.akshansh.chessweb.listener;
 
 import com.akshansh.chessweb.model.ChatMessage;
-import com.akshansh.chessweb.model.MessageType;
+import com.akshansh.chessweb.model.enums.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

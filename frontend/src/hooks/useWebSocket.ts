@@ -3,7 +3,7 @@ import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { ChatMessage, MessageType } from "@/types/chat";
 
-const WS_URL = "http://localhost:8080/ws"; // Assuming backend runs on 8080
+const WS_URL = "http://localhost:8080/ws";
 
 export const useWebSocket = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

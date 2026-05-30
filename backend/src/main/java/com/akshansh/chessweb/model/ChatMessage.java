@@ -1,5 +1,6 @@
 package com.akshansh.chessweb.model;
 
+import com.akshansh.chessweb.model.enums.MessageType;
 import lombok.*;
 
 @Getter
