@@ -22,7 +22,7 @@ public class Move {
     private boolean isCheck;
     private boolean isCheckmate;
     private boolean isCastling;
-    private boolean sanNotation;
-    private boolean fenAfter;
+    private String sanNotation;
+    private String fenAfter;
     private Instant playedAt;
 }
