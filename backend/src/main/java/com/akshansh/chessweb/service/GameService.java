@@ -1,12 +1,15 @@
 package com.akshansh.chessweb.service;
 
+import com.akshansh.chessweb.exception.ResourceNotFoundException;
 import com.akshansh.chessweb.model.GameSession;
 import com.akshansh.chessweb.model.dto.CreateGameReqDto;
+import com.akshansh.chessweb.model.dto.JoinGameReqDto;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -34,5 +37,21 @@ public class GameService {
         store.saveGame(newSession);
 
         return newSession.getId();
+    }
+
+    public void joinGame(JoinGameReqDto request){
+        GameSession session = store.findById(request.getGameId())
+                .orElseThrow(() -> new ResourceNotFoundException("Game session not found"));
+
+        if(request.getPlayerColor().equals(Color.BLACK)){
+            session.setBlackPlayerId(request.getPlayerId());
+            session.setBlackPlayerName(request.getPlayerName());
+        } else{
+            session.setWhitePlayerId(request.getPlayerId());
+            session.setWhitePlayerName(request.getPlayerName());
+        }
+
+        session.setStatus(GameStatus.ACTIVE);
+        session.setStartedAt(Instant.now());
     }
 }
