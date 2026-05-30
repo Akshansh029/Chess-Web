@@ -8,7 +8,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class EchoController {
+public class GameController {
 
     @MessageMapping("/sendMessage")
     @SendTo("/topic/public")
@@ -24,4 +24,7 @@ public class EchoController {
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         return chatMessage;
     }
+
+//    @MessageMapping("/game.{id}")
+//    public ChatMessage gameStarted()
 }

@@ -7,10 +7,12 @@ import com.akshansh.chessweb.model.dto.JoinGameReqDto;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
@@ -20,6 +22,7 @@ import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
 public class GameService {
 
     private final GameStore store;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public UUID createGame(CreateGameReqDto request){
         GameSession newSession = GameSession.builder()
@@ -39,7 +42,7 @@ public class GameService {
         return newSession.getId();
     }
 
-    public void joinGame(JoinGameReqDto request){
+    public GameSession joinGame(JoinGameReqDto request){
         GameSession session = store.findById(request.getGameId())
                 .orElseThrow(() -> new ResourceNotFoundException("Game session not found"));
 
@@ -53,5 +56,16 @@ public class GameService {
 
         session.setStatus(GameStatus.ACTIVE);
         session.setStartedAt(Instant.now());
+
+        messagingTemplate.convertAndSend(
+                "/topic/game." + session.getId(),
+                session
+        );
+
+        return session;
+    }
+
+    public List<GameSession> getWaitingSessions(){
+        return store.findWaitingGames();
     }
 }
