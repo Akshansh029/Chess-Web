@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     "High-performance real-time multiplayer chess platform built with Spring Boot and Next.js.",
 };
 
+import { GameProvider } from "@/context/GameContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +30,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-background">
+        <GameProvider>{children}</GameProvider>
+      </body>
     </html>
   );
 }
