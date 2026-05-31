@@ -13,9 +13,17 @@ interface GameContextType {
   playerId: string;
   connected: boolean;
   connect: () => void;
+  disconnect: () => void;
   gameSession: GameSession | null;
   setGameSession: (session: GameSession | null) => void;
   subscribeToGame: (gameId: string) => void;
+  unsubscribeFromGame: () => void;
+  sendMove: (
+    gameId: string,
+    playerId: string,
+    move: { from: string; to: string; piece: string; promotionPiece?: string },
+    color: Color
+  ) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -58,9 +66,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
         playerId,
         connected: ws.connected,
         connect: ws.connect,
+        disconnect: ws.disconnect,
         gameSession: ws.gameSession,
         setGameSession: ws.setGameSession,
         subscribeToGame: ws.subscribeToGame,
+        unsubscribeFromGame: ws.unsubscribeFromGame,
+        sendMove: ws.sendMove,
       }}
     >
       {children}

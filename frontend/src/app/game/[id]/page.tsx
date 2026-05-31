@@ -15,6 +15,7 @@ export default function GamePage() {
     connected,
     connect,
     subscribeToGame,
+    unsubscribeFromGame,
   } = useGame();
   const router = useRouter();
 
@@ -29,7 +30,19 @@ export default function GamePage() {
     } else if (id) {
       subscribeToGame(id);
     }
-  }, [id, connected, playerName, connect, subscribeToGame, router]);
+
+    return () => {
+      unsubscribeFromGame();
+    };
+  }, [
+    id,
+    connected,
+    playerName,
+    connect,
+    subscribeToGame,
+    unsubscribeFromGame,
+    router,
+  ]);
 
   if (!playerName) return null;
 

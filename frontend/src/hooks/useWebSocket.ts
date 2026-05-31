@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { ChatMessage, MessageType, GameSession } from "@/types/game";
+import { ChatMessage, MessageType, GameSession, Color } from "@/types/game";
 
 const WS_URL = "http://localhost:8080/ws";
 
@@ -29,7 +29,8 @@ export const useWebSocket = () => {
       if (clientRef.current?.active) return;
 
       const client = new Client({
-        webSocketFactory: () => new SockJS(WS_URL),
+        webSocketFactory: () =>
+          new SockJS(WS_URL, null, { transports: ["websocket"] }),
         onConnect: () => {
           setConnected(true);
           client.subscribe("/topic/public", onPublicMessageReceived);
@@ -70,6 +71,13 @@ export const useWebSocket = () => {
     [onGameUpdateReceived],
   );
 
+  const unsubscribeFromGame = useCallback(() => {
+    if (subscriptionsRef.current.game) {
+      subscriptionsRef.current.game.unsubscribe();
+      delete subscriptionsRef.current.game;
+    }
+  }, []);
+
   const sendMessage = useCallback((username: string, content: string) => {
     if (clientRef.current?.connected) {
       clientRef.current.publish({
@@ -83,9 +91,31 @@ export const useWebSocket = () => {
     }
   }, []);
 
+  const sendMove = useCallback(
+    (
+      gameId: string,
+      playerId: string,
+      move: { from: string; to: string; piece: string; promotionPiece?: string },
+      color: Color
+    ) => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/game.move",
+          body: JSON.stringify({
+            gameId,
+            playerId,
+            move,
+            color,
+          }),
+        });
+      }
+    },
+    []
+  );
+
   const disconnect = useCallback(() => {
     if (clientRef.current) {
-      clientRef.current.deactivate();
+      clientRef.current.deactivate({ force: true });
       clientRef.current = null;
       setConnected(false);
     }
@@ -94,7 +124,7 @@ export const useWebSocket = () => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (clientRef.current) {
-        clientRef.current.deactivate();
+        clientRef.current.deactivate({ force: true });
       }
     };
 
@@ -103,7 +133,7 @@ export const useWebSocket = () => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       if (clientRef.current) {
-        clientRef.current.deactivate();
+        clientRef.current.deactivate({ force: true });
       }
     };
   }, []);
@@ -116,6 +146,8 @@ export const useWebSocket = () => {
     connect,
     disconnect,
     sendMessage,
+    sendMove,
     subscribeToGame,
+    unsubscribeFromGame,
   };
 };

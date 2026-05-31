@@ -7,6 +7,8 @@ import {
   GameStatus,
 } from "@/types/game";
 import { Target, Cpu, Activity, User } from "lucide-react";
+import { useChessStore } from "@/services/chessStore";
+import ChessBoardWrapper from "./ChessBoardWrapper";
 
 interface GameSessionViewProps {
   session: GameSessionType | null;
@@ -19,6 +21,14 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
   myColor,
   myName,
 }) => {
+  const setFen = useChessStore((state) => state.setFen);
+
+  React.useEffect(() => {
+    if (session?.currentFen) {
+      setFen(session.currentFen);
+    }
+  }, [session?.currentFen, setFen]);
+
   if (!session) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-white">
@@ -71,33 +81,10 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
         </div>
       </div>
 
-      {/* Main Stage (Chessboard Placeholder) */}
+      {/* Main Stage (Chessboard) */}
       <div className="lg:col-span-6 flex flex-col items-center gap-6">
         <div className="glass-card p-4 border-white/10 shadow-2xl shadow-black/50">
-          <div className="aspect-square w-full max-w-[500px] bg-slate-900 rounded-lg overflow-hidden relative border-4 border-white/5">
-            {/* Simplified grid placeholder for chessboard */}
-            <div className="grid grid-cols-8 grid-rows-8 h-full w-full opacity-20">
-              {Array.from({ length: 64 }).map((_, i) => {
-                const row = Math.floor(i / 8);
-                const col = i % 8;
-                const isDark = (row + col) % 2 === 1;
-                return (
-                  <div
-                    key={i}
-                    className={isDark ? "bg-slate-700" : "bg-transparent"}
-                  ></div>
-                );
-              })}
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="flex flex-col items-center opacity-10">
-                <Cpu size={80} />
-                <span className="text-sm font-black uppercase tracking-[0.5em] mt-4 italic">
-                  Neural Core Active
-                </span>
-              </div>
-            </div>
-          </div>
+          <ChessBoardWrapper />
         </div>
 
         <div className="flex gap-4 w-full">
