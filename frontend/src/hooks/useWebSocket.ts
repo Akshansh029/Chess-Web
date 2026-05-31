@@ -138,6 +138,22 @@ export const useWebSocket = () => {
     };
   }, []);
 
+  const sendResign = useCallback(
+    (gameId: string, playerId: string, playerName: string) => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/game.resign",
+          body: JSON.stringify({
+            gameId,
+            playerId,
+            playerName,
+          }),
+        });
+      }
+    },
+    []
+  );
+
   return {
     messages,
     gameSession,
@@ -147,6 +163,7 @@ export const useWebSocket = () => {
     disconnect,
     sendMessage,
     sendMove,
+    sendResign,
     subscribeToGame,
     unsubscribeFromGame,
   };

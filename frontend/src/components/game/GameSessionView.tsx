@@ -9,7 +9,7 @@ import {
   GameTerminationReason,
   Move,
 } from "@/types/game";
-import { Target, Activity, User } from "lucide-react";
+import { Target, Activity, User, Flag, Handshake } from "lucide-react";
 import { useChessStore } from "@/services/chessStore";
 import ChessBoardWrapper from "./ChessBoardWrapper";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 }) => {
   const setFen = useChessStore((state) => state.setFen);
   const router = useRouter();
-  const { setGameSession } = useGame();
+  const { setGameSession, playerId, sendResign } = useGame();
   const [showGameOverModal, setShowGameOverModal] = React.useState(false);
 
   React.useEffect(() => {
@@ -54,6 +54,20 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     router.push("/lobby");
   };
 
+  const [showResignConfirm, setShowResignConfirm] = React.useState(false);
+
+  const confirmResign = () => {
+    if (session?.status !== GameStatus.ACTIVE) return;
+    sendResign(session.id, playerId, myName);
+    setShowResignConfirm(false);
+  };
+
+  React.useEffect(() => {
+    if (session?.status !== GameStatus.ACTIVE) {
+      setShowResignConfirm(false);
+    }
+  }, [session?.status]);
+
   if (!session) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-white">
@@ -68,6 +82,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
   console.log(session);
 
   const isWaiting = session.status === GameStatus.WAITING;
+  const isGameActive = session.status === GameStatus.ACTIVE;
   const opponentName =
     myColor === Color.WHITE ? session.blackPlayerName : session.whitePlayerName;
   const opponentColor = myColor === Color.WHITE ? Color.BLACK : Color.WHITE;
@@ -163,12 +178,54 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 hover:border-red-500/30 transition-all text-red-400">
-              Resign Match
-            </button>
-            <button className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 hover:border-primary/30 transition-all text-primary">
+          <div className="flex gap-4 relative">
+            <div className="relative flex-1">
+              <button
+                onClick={() => setShowResignConfirm(true)}
+                disabled={!isGameActive}
+                className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 hover:border-red-500/30 transition-all text-red-400 ${!isGameActive ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                Resign
+                <Flag size={14} className="ml-2" />
+              </button>
+
+              <AnimatePresence>
+                {showResignConfirm && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 p-4 rounded-xl border border-white/10 bg-slate-900 shadow-2xl flex flex-col items-center gap-3 text-center min-w-[160px]"
+                  >
+                    {/* Arrow/Triangle pointing to the button */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-[1px]"></div>
+
+                    <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
+                      Confirm Resign?
+                    </p>
+                    <div className="flex gap-2 w-full">
+                      <button
+                        onClick={confirmResign}
+                        className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setShowResignConfirm(false)}
+                        className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <button className="flex-1 flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 hover:border-primary/30 transition-all text-primary">
               Offer Draw
+              <Handshake size={14} className="ml-2" />
             </button>
           </div>
         </div>
