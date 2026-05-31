@@ -19,6 +19,8 @@ public class MoveResult {
     private boolean check;
     private boolean checkmate;
     private boolean stalemate;
+    private boolean insufficientMaterial;
+    private boolean repetition;
     private boolean castling;
     private boolean enPassant;
     private boolean promotion;

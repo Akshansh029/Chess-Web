@@ -62,11 +62,20 @@ public class GameController {
         session.setCurrentTurn(request.getColor().equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
 
         // Check if game over
-        if (result.isCheckmate() || result.isStalemate()) {
+        if (result.isCheckmate() || result.isStalemate() || result.isInsufficientMaterial() || result.isRepetition()) {
+            GameTerminationReason terminationReason = GameTerminationReason.CHECKMATE;
+
+            if(result.isInsufficientMaterial()){
+                terminationReason = GameTerminationReason.INSUFFICIENT_MATERIAL;
+            } else if (result.isStalemate()) {
+                terminationReason = GameTerminationReason.STALEMATE;
+            } else if (result.isRepetition()){
+                terminationReason = GameTerminationReason.REPETITION;
+            }
+
             session.setStatus(GameStatus.ENDED);
             session.setResult(result.isCheckmate() ? request.getColor() == Color.WHITE ? GameResult.WHITE_WON : GameResult.BLACK_WON : GameResult.DRAW);
-            session.setTerminationReason(result.isCheckmate() ? GameTerminationReason.CHECKMATE : GameTerminationReason.STALEMATE);
-
+            session.setTerminationReason(terminationReason);
         }
 
         // Broadcast updated state

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.akshansh.chessweb.utils.ChessConstants.STALEMATE_FEN;
 import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
 
 @Service

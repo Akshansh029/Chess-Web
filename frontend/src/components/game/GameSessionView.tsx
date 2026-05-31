@@ -9,7 +9,7 @@ import {
   GameTerminationReason,
   Move,
 } from "@/types/game";
-import { Target, Cpu, Activity, User } from "lucide-react";
+import { Target, Activity, User } from "lucide-react";
 import { useChessStore } from "@/services/chessStore";
 import ChessBoardWrapper from "./ChessBoardWrapper";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,18 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
   const setFen = useChessStore((state) => state.setFen);
   const router = useRouter();
   const { setGameSession } = useGame();
+  const [showGameOverModal, setShowGameOverModal] = React.useState(false);
+
+  React.useEffect(() => {
+    if (session?.status === GameStatus.ENDED) {
+      const timer = setTimeout(() => {
+        setShowGameOverModal(true);
+      }, 1200); // 1.2 seconds
+      return () => clearTimeout(timer);
+    } else {
+      setShowGameOverModal(false);
+    }
+  }, [session?.status]);
 
   React.useEffect(() => {
     if (session?.currentFen) {
@@ -52,6 +64,8 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
       </div>
     );
   }
+
+  console.log(session);
 
   const isWaiting = session.status === GameStatus.WAITING;
   const opponentName =
@@ -162,7 +176,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
       {/* GameOver Modal Overlay */}
       <AnimatePresence>
-        {session.status === GameStatus.ENDED && (
+        {showGameOverModal && (
           <GameOverModal
             session={session}
             myColor={myColor}
@@ -190,8 +204,6 @@ const GameOverModal = ({
     (session.result === GameResult.WHITE_WON && myColor === Color.BLACK) ||
     (session.result === GameResult.BLACK_WON && myColor === Color.WHITE);
   const isDraw = session.result === GameResult.DRAW;
-
-  console.log(session);
 
   let title = "Game Over";
   let titleColor = "text-white";

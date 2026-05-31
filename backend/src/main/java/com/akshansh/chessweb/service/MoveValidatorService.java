@@ -33,7 +33,16 @@ public class MoveValidatorService {
         }
 
         Board board = new Board();
-        board.loadFromFen(session.getCurrentFen());
+        if (session.getMoveHistory() != null && !session.getMoveHistory().isEmpty()) {
+            for (com.akshansh.chessweb.model.Move historyMove : session.getMoveHistory()) {
+                Move m = buildMove(historyMove);
+                if (m != null) {
+                    board.doMove(m);
+                }
+            }
+        } else {
+            board.loadFromFen(session.getCurrentFen());
+        }
 
         MoveDto dto = request.getMove();
         Move move = buildMove(dto);
@@ -57,6 +66,8 @@ public class MoveValidatorService {
                 .check(board.isKingAttacked())
                 .checkmate(board.isMated())
                 .stalemate(board.isStaleMate())
+                .insufficientMaterial(board.isInsufficientMaterial())
+                .repetition(board.isRepetition())
                 .castling(isCastling(dto))
                 .enPassant(isEnPassant(board, move))
                 .promotion(dto.getPromotionPiece() != null)
@@ -107,6 +118,22 @@ public class MoveValidatorService {
 
     private MoveResult invalid(String reason) {
         return MoveResult.builder().valid(false).rejectionReason(reason).build();
+    }
+
+    private Move buildMove(com.akshansh.chessweb.model.Move moveRecord) {
+        try {
+            Square from = Square.fromValue(moveRecord.getFromSquare().toUpperCase());
+            Square to   = Square.fromValue(moveRecord.getToSquare().toUpperCase());
+
+            if (moveRecord.getPromotionPiece() != null && !moveRecord.getPromotionPiece().isEmpty()) {
+                Piece promo = Piece.fromFenSymbol(moveRecord.getPromotionPiece());
+                return new Move(from, to, promo);
+            }
+
+            return new Move(from, to);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private boolean isCastling(MoveDto dto) {
