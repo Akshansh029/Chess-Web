@@ -73,43 +73,9 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 sm:p-12 overflow-y-auto">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
         {children}
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-50 py-8 border-t border-white/5 bg-black/40 backdrop-blur-xl">
-        <div className="container mx-auto px-12 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 hover:opacity-80 transition-opacity">
-          <div className="flex gap-8 items-center text-[10px] font-black uppercase tracking-[0.3em]">
-            <div className="flex items-center gap-2 group cursor-pointer text-white">
-              <History
-                size={14}
-                className="text-primary group-hover:scale-110 transition-transform"
-              />
-              <span>Global Stats</span>
-            </div>
-            <div className="flex items-center gap-2 group cursor-pointer border-l border-white/10 pl-8 text-white">
-              <MessageSquare
-                size={14}
-                className="text-primary group-hover:scale-110 transition-transform"
-              />
-              <span>World Relay</span>
-            </div>
-            <div className="flex items-center gap-2 group cursor-pointer border-l border-white/10 pl-8 text-white">
-              <Zap
-                size={14}
-                className="text-orange-400 group-hover:scale-110 transition-transform"
-              />
-              <span>Latency: 24ms</span>
-            </div>
-          </div>
-          <div className="text-[9px] font-mono text-center md:text-right text-foreground/40 leading-relaxed uppercase tracking-widest">
-            System: Distributed Neural Engine 2026.0b
-            <br />
-            Protocol: Secure STOMP/WS
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

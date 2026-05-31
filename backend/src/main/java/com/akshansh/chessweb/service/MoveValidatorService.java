@@ -130,7 +130,7 @@ public class MoveValidatorService {
         // Destination square must be empty
         boolean destinationEmpty = board.getPiece(move.getTo()).equals(Piece.NONE);
         if (!destinationEmpty) return false;
-        
+
         Square epTarget = board.getEnPassantTarget();
         return move.getTo().equals(epTarget);
     }

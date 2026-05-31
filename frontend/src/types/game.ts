@@ -15,11 +15,29 @@ export enum GameStatus {
   ENDED = "ENDED",
 }
 
+export enum GameResult {
+  WHITE_WON = "WHITE_WON",
+  BLACK_WON = "BLACK_WON",
+  DRAW = "DRAW",
+}
+
+export enum GameTerminationReason {
+  CHECKMATE = "CHECKMATE",
+  RESIGNATION = "RESIGNATION",
+  TIMEOUT = "TIMEOUT",
+  STALEMATE = "STALEMATE",
+  INSUFFICIENT_MATERIAL = "INSUFFICIENT_MATERIAL",
+  REPETITION = "REPETITION",
+}
+
 export interface Move {
   from: string;
   to: string;
   piece: string;
-  timestamp: string;
+  timestamp?: string;
+  moveNumber?: number;
+  color?: Color;
+  sanNotation?: string;
 }
 
 export interface GameSession {
@@ -33,6 +51,8 @@ export interface GameSession {
   currentTurn: Color;
   moveHistory: Move[];
   startedAt?: string;
+  result?: GameResult | null;
+  terminationReason?: GameTerminationReason | null;
 }
 
 export interface ChatMessage {

@@ -19,7 +19,7 @@ const Chessboard = dynamic(
         </span>
       </div>
     ),
-  }
+  },
 );
 
 interface PieceDropArgs {
@@ -87,7 +87,7 @@ export default function ChessBoardWrapper() {
                 : "q"
               : undefined,
           },
-          playerColor
+          playerColor,
         );
         return true;
       }
@@ -100,7 +100,7 @@ export default function ChessBoardWrapper() {
   };
 
   return (
-    <div className="w-full max-w-[500px] aspect-square rounded-xl overflow-hidden shadow-2xl relative border border-white/10 bg-slate-950">
+    <div className="w-full max-w-[600px] aspect-square rounded-xl overflow-hidden shadow-2xl relative border border-white/10 bg-slate-950">
       <Chessboard
         options={{
           position: fen,
