@@ -1,11 +1,13 @@
 package com.akshansh.chessweb.controller;
 
 import com.akshansh.chessweb.exception.GameNotFoundException;
+import com.akshansh.chessweb.exception.PlayerNotInGameException;
 import com.akshansh.chessweb.model.ChatMessage;
 import com.akshansh.chessweb.model.GameSession;
 import com.akshansh.chessweb.model.Move;
 import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;
+import com.akshansh.chessweb.model.dto.ResignRequest;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.model.enums.GameStatus;
@@ -79,6 +81,30 @@ public class GameController {
         }
 
         // Broadcast updated state
+        messagingTemplate.convertAndSend(
+                "/topic/game." + session.getId(),
+                session
+        );
+    }
+
+    @MessageMapping("/game.resign")
+    public void resignGame(@Payload ResignRequest request){
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        session.setStatus(GameStatus.ENDED);
+        session.setTerminationReason(GameTerminationReason.RESIGNATION);
+
+        if(request.getPlayerId().equals(session.getWhitePlayerId())){
+            session.setResult(GameResult.BLACK_WON);
+        } else if (request.getPlayerId().equals(session.getBlackPlayerId())){
+            session.setResult(GameResult.WHITE_WON);
+        } else{
+            throw new PlayerNotInGameException(
+                    "Player " + request.getPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5)
+            );
+        }
+
         messagingTemplate.convertAndSend(
                 "/topic/game." + session.getId(),
                 session
