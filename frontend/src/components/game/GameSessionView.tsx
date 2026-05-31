@@ -136,7 +136,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
             </div>
             <div className="space-y-1 text-right">
               <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
-                Turn Color
+                Active Turn
               </p>
               <span className="inline-flex items-center gap-1.5">
                 <span

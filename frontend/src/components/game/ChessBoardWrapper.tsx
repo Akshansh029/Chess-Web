@@ -40,7 +40,65 @@ export default function ChessBoardWrapper() {
   const isMyTurn = gameSession?.currentTurn === playerColor;
   const isGameActive = gameSession?.status === GameStatus.ACTIVE;
 
-  // Highlight valid moves for the selected piece
+  // Memoized base square styles for king-in-check
+  const getBaseSquareStyles = React.useMemo((): Record<
+    string,
+    React.CSSProperties
+  > => {
+    const styles: Record<string, React.CSSProperties> = {};
+    if (!fen) return styles;
+
+    try {
+      const game = new Chess(fen);
+
+      // king in check highlight
+      if (game.inCheck()) {
+        const turn = game.turn();
+        const board = game.board();
+        let kingSquare: string | null = null;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.type === "k" && piece.color === turn) {
+              kingSquare = piece.square;
+              break;
+            }
+          }
+          if (kingSquare) break;
+        }
+
+        if (kingSquare) {
+          styles[kingSquare] = {
+            boxShadow: "inset 0 0 0 4px #ef4444, 0 0 12px #ef4444",
+            backgroundColor: "rgba(239, 68, 68, 0.25)",
+          };
+        }
+      }
+    } catch (e) {
+      console.error("Error calculating chess board base highlights:", e);
+    }
+
+    return styles;
+  }, [fen]);
+
+  // combine base styles with transient option
+  const getCombinedSquareStyles = (): Record<string, React.CSSProperties> => {
+    const base = getBaseSquareStyles;
+    const combined = { ...base };
+
+    Object.keys(optionSquares).forEach((square) => {
+      const baseStyle = base[square] || {};
+      const optionStyle = optionSquares[square] || {};
+      combined[square] = {
+        ...baseStyle,
+        ...optionStyle,
+      };
+    });
+
+    return combined;
+  };
+
+  // Highlight valid moves
   const getMoveOptions = (square: string): boolean => {
     const game = new Chess(fen);
     const moves = game.moves({
@@ -53,18 +111,24 @@ export default function ChessBoardWrapper() {
     }
 
     const newSquares: Record<string, React.CSSProperties> = {};
-    // Highlight the selected origin square with a subtle golden glow
     newSquares[square] = {
       background: "rgba(245, 158, 11, 0.2)",
     };
 
     moves.forEach((move) => {
+      const isCapture = !!move.captured;
       newSquares[move.to] = {
         background:
           game.get(move.to as any) !== null
-            ? "radial-gradient(circle, rgba(67, 122, 255, 0.8) 20%, transparent 20%)" // Capture indicator (red circle)
-            : "radial-gradient(circle, rgba(59, 130, 246, 0.4) 20%, transparent 20%)", // Move indicator (blue dot)
-        borderRadius: "50%",
+            ? "radial-gradient(circle, rgba(67, 122, 255, 0.8) 20%, transparent 20%)" // Move indicator (blue dot)
+            : "radial-gradient(circle, rgba(59, 130, 246, 0.9) 20%, transparent 20%)",
+        borderRadius: isCapture ? undefined : "50%",
+        ...(isCapture
+          ? {
+              boxShadow: "inset 0 0 0 3px #f59e0b",
+              backgroundColor: "rgba(245, 158, 11, 0.15)",
+            }
+          : {}),
       };
     });
 
@@ -75,7 +139,7 @@ export default function ChessBoardWrapper() {
   // Drag start handler to highlight moves
   const onPieceDrag = ({ square }: { square: string | null }) => {
     if (!square || !isGameActive || !isMyTurn) return;
-    if (moveFrom === square) return; // avoid redundant calculations
+    if (moveFrom === square) return;
     setMoveFrom(square);
     getMoveOptions(square);
   };
@@ -86,7 +150,6 @@ export default function ChessBoardWrapper() {
     sourceSquare,
     targetSquare,
   }: PieceDropArgs): boolean => {
-    // Clear selection and move option overlays
     setMoveFrom(null);
     setOptionSquares({});
 
@@ -237,7 +300,7 @@ export default function ChessBoardWrapper() {
           onPieceDrop,
           onSquareClick,
           onPieceDrag,
-          squareStyles: optionSquares,
+          squareStyles: getCombinedSquareStyles(),
           boardOrientation: playerColor === Color.WHITE ? "white" : "black",
           allowDragging: isGameActive && isMyTurn,
           darkSquareStyle: { backgroundColor: "#475569" },
