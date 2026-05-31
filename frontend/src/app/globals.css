@@ -46,7 +46,12 @@ body {
   background-size: 30px 30px;
 }
 
-/* Smooth transitions */
-* {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+
+/* Disable transitions on all elements inside the chessboard to prevent dragging lag and offsets */
+[data-board-id],
+[data-board-id] *,
+.react-chessboard-container,
+.react-chessboard-container * {
+  transition: none !important;
 }
