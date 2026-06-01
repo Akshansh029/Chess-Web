@@ -29,6 +29,6 @@ public class GameSession {
 
     private String currentFen;
     private Color currentTurn;
-    private List<Move> moveHistory;
+    private List<MoveRecord> moveRecordHistory;
     private UUID drawOfferBy;
 }

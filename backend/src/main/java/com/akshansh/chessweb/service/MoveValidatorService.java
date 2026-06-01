@@ -4,6 +4,7 @@ import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.MoveDto;
 import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;
+import com.akshansh.chessweb.model.entity.MoveRecord;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import com.github.bhlangonijr.chesslib.*;
@@ -33,9 +34,9 @@ public class MoveValidatorService {
         }
 
         Board board = new Board();
-        if (session.getMoveHistory() != null && !session.getMoveHistory().isEmpty()) {
-            for (com.akshansh.chessweb.model.entity.Move historyMove : session.getMoveHistory()) {
-                Move m = buildMove(historyMove);
+        if (session.getMoveRecordHistory() != null && !session.getMoveRecordHistory().isEmpty()) {
+            for (MoveRecord historyMoveRecord : session.getMoveRecordHistory()) {
+                Move m = buildMove(historyMoveRecord);
                 if (m != null) {
                     board.doMove(m);
                 }
@@ -120,7 +121,7 @@ public class MoveValidatorService {
         return MoveResult.builder().valid(false).rejectionReason(reason).build();
     }
 
-    private Move buildMove(com.akshansh.chessweb.model.entity.Move moveRecord) {
+    private Move buildMove(MoveRecord moveRecord) {
         try {
             Square from = Square.fromValue(moveRecord.getFromSquare().toUpperCase());
             Square to   = Square.fromValue(moveRecord.getToSquare().toUpperCase());

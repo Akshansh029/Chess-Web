@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class Move {
+public class MoveRecord {
     private UUID id;
     private UUID gameId;
     private int moveNumber;

@@ -31,7 +31,7 @@ public class GameService {
                 .blackPlayerId(request.getPlayerColor().equals(Color.BLACK) ? request.getPlayerId() : null)
                 .whitePlayerName(request.getPlayerColor().equals(Color.WHITE) ? request.getPlayerName() : null)
                 .blackPlayerName(request.getPlayerColor().equals(Color.BLACK) ? request.getPlayerName() : null)
-                .moveHistory(new ArrayList<>())
+                .moveRecordHistory(new ArrayList<>())
                 .currentTurn(Color.WHITE)
                 .currentFen(STARTING_FEN)
                 .status(GameStatus.WAITING)

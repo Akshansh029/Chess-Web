@@ -3,7 +3,7 @@ package com.akshansh.chessweb.controller;
 import com.akshansh.chessweb.exception.GameNotFoundException;
 import com.akshansh.chessweb.exception.PlayerNotInGameException;
 import com.akshansh.chessweb.model.entity.GameSession;
-import com.akshansh.chessweb.model.entity.Move;
+import com.akshansh.chessweb.model.entity.MoveRecord;
 import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
@@ -40,8 +40,8 @@ public class GameController {
             return; // invalid move
         }
 
-        Move moveRecord = Move.builder()
-                .moveNumber(session.getMoveHistory().size() / 2 + 1)
+        MoveRecord moveRecord = MoveRecord.builder()
+                .moveNumber(session.getMoveRecordHistory().size() / 2 + 1)
                 .color(request.getColor())
                 .fromSquare(request.getMove().getFrom())
                 .toSquare(request.getMove().getTo())
@@ -55,7 +55,7 @@ public class GameController {
                 .playedAt(Instant.now())
                 .build();
 
-        session.getMoveHistory().add(moveRecord);
+        session.getMoveRecordHistory().add(moveRecord);
         session.setCurrentFen(result.getNewFen());
         session.setCurrentTurn(request.getColor().equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
         session.setDrawOfferBy(null); // Any move declines the draw offer
