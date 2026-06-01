@@ -126,8 +126,8 @@ public class MoveValidatorService {
             Square from = Square.fromValue(moveRecord.getFromSquare().toUpperCase());
             Square to   = Square.fromValue(moveRecord.getToSquare().toUpperCase());
 
-            if (moveRecord.getPromotionPiece() != null && !moveRecord.getPromotionPiece().isEmpty()) {
-                Piece promo = Piece.fromFenSymbol(moveRecord.getPromotionPiece());
+            if (moveRecord.getPromotionPiece() != null && !moveRecord.getPromotionPiece().toString().isEmpty()) {
+                Piece promo = Piece.fromFenSymbol(moveRecord.getPromotionPiece().toString());
                 return new Move(from, to, promo);
             }
 

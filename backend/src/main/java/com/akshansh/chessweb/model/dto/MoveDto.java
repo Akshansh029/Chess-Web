@@ -1,5 +1,6 @@
 package com.akshansh.chessweb.model.dto;
 
+import com.akshansh.chessweb.model.enums.PieceType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,7 @@ public class MoveDto {
     private String to;
 
     @NotBlank
-    private String piece;
+    private PieceType piece;
 
     private String promotionPiece;
 }

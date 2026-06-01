@@ -6,6 +6,7 @@ import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
+import com.akshansh.chessweb.model.enums.PieceType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -34,7 +35,7 @@ class MoveValidatorServiceTest {
                 .move(MoveDto.builder()
                         .from("e2")
                         .to("e4")
-                        .piece("P")
+                        .piece(PieceType.P)
                         .build())
                 .color(Color.WHITE)
                 .build();
