@@ -25,6 +25,23 @@ interface GameContextType {
     color: Color
   ) => void;
   sendResign: (gameId: string, playerId: string, playerName: string) => void;
+  sendDrawOffer: (
+    gameId: string,
+    playerId: string,
+    playerName: string,
+    opponentId: string,
+    opponentName: string
+  ) => void;
+  sendDrawAccept: (
+    gameId: string,
+    offerAccepterByPlayerId: string,
+    offerAcceptedByPlayerName: string
+  ) => void;
+  sendDrawDecline: (
+    gameId: string,
+    offerAccepterByPlayerId: string,
+    offerAcceptedByPlayerName: string
+  ) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -74,6 +91,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
         unsubscribeFromGame: ws.unsubscribeFromGame,
         sendMove: ws.sendMove,
         sendResign: ws.sendResign,
+        sendDrawOffer: ws.sendDrawOffer,
+        sendDrawAccept: ws.sendDrawAccept,
+        sendDrawDecline: ws.sendDrawDecline,
       }}
     >
       {children}

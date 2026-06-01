@@ -29,7 +29,14 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 }) => {
   const setFen = useChessStore((state) => state.setFen);
   const router = useRouter();
-  const { setGameSession, playerId, sendResign } = useGame();
+  const {
+    setGameSession,
+    playerId,
+    sendResign,
+    sendDrawOffer,
+    sendDrawAccept,
+    sendDrawDecline,
+  } = useGame();
   const [showGameOverModal, setShowGameOverModal] = React.useState(false);
 
   React.useEffect(() => {
@@ -55,6 +62,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
   };
 
   const [showResignConfirm, setShowResignConfirm] = React.useState(false);
+  const [showDrawConfirm, setShowDrawConfirm] = React.useState(false);
 
   const confirmResign = () => {
     if (session?.status !== GameStatus.ACTIVE) return;
@@ -62,9 +70,37 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     setShowResignConfirm(false);
   };
 
+  const confirmOfferDraw = () => {
+    if (session?.status !== GameStatus.ACTIVE) return;
+    if (session.drawOfferBy) return;
+
+    const oppId =
+      myColor === Color.WHITE ? session.blackPlayerId : session.whitePlayerId;
+    const oppName =
+      myColor === Color.WHITE
+        ? session.blackPlayerName
+        : session.whitePlayerName;
+
+    if (!oppId || !oppName) return;
+
+    sendDrawOffer(session.id, playerId, myName, oppId, oppName);
+    setShowDrawConfirm(false);
+  };
+
+  const handleAcceptDraw = () => {
+    if (session?.status !== GameStatus.ACTIVE) return;
+    sendDrawAccept(session.id, playerId, myName);
+  };
+
+  const handleDeclineDraw = () => {
+    if (session?.status !== GameStatus.ACTIVE) return;
+    sendDrawDecline(session.id, playerId, myName);
+  };
+
   React.useEffect(() => {
     if (session?.status !== GameStatus.ACTIVE) {
       setShowResignConfirm(false);
+      setShowDrawConfirm(false);
     }
   }, [session?.status]);
 
@@ -176,56 +212,125 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-4 relative">
-            <div className="relative flex-1">
-              <button
-                onClick={() => setShowResignConfirm(true)}
-                disabled={!isGameActive}
-                className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 hover:border-red-500/30 transition-all text-red-400 ${!isGameActive ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                Resign
-                <Flag size={14} className="ml-2" />
-              </button>
-
-              <AnimatePresence>
-                {showResignConfirm && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 p-4 rounded-xl border border-white/10 bg-slate-900 shadow-2xl flex flex-col items-center gap-3 text-center min-w-[160px]"
-                  >
-                    {/* Arrow/Triangle pointing to the button */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-px"></div>
-
-                    <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
-                      Confirm Resign?
-                    </p>
-                    <div className="flex gap-2 w-full">
-                      <button
-                        onClick={confirmResign}
-                        className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
-                      >
-                        Yes
-                      </button>
-                      <button
-                        onClick={() => setShowResignConfirm(false)}
-                        className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
-                      >
-                        No
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {session.drawOfferBy && session.drawOfferBy !== playerId ? (
+            <div className="p-4 rounded-xl border border-primary/20 bg-slate-900/60 shadow-lg flex flex-col items-center gap-3 text-center">
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse flex items-center gap-2">
+                <Handshake size={16} />
+                Draw Offered by Opponent
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={handleAcceptDraw}
+                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[9px] uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(16,185,129,0.2)] font-black"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={handleDeclineDraw}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
+                >
+                  Decline
+                </button>
+              </div>
             </div>
-            <button className="flex-1 flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 hover:border-primary/30 transition-all text-primary">
-              Offer Draw
-              <Handshake size={14} className="ml-2" />
-            </button>
-          </div>
+          ) : (
+            <div className="flex gap-4 relative">
+              <div className="relative flex-1">
+                <button
+                  onClick={() => setShowResignConfirm(true)}
+                  disabled={!isGameActive || !!session.drawOfferBy}
+                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 hover:border-red-500/30 transition-all text-red-400 ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  Resign
+                  <Flag size={14} className="ml-2" />
+                </button>
+
+                <AnimatePresence>
+                  {showResignConfirm && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 p-4 rounded-xl border border-white/10 bg-slate-900 shadow-2xl flex flex-col items-center gap-3 text-center min-w-[160px]"
+                    >
+                      {/* Arrow/Triangle pointing to the button */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-px"></div>
+
+                      <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
+                        Confirm Resign?
+                      </p>
+                      <div className="flex gap-2 w-full">
+                        <button
+                          onClick={confirmResign}
+                          className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setShowResignConfirm(false)}
+                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="relative flex-1">
+                <button
+                  onClick={() => {
+                    if (session.drawOfferBy !== playerId) {
+                      setShowDrawConfirm(true);
+                    }
+                  }}
+                  disabled={!isGameActive || !!session.drawOfferBy}
+                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 hover:border-primary/30 transition-all text-primary ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {session.drawOfferBy === playerId
+                    ? "Offered..."
+                    : "Offer Draw"}
+                  <Handshake size={14} className="ml-2" />
+                </button>
+
+                <AnimatePresence>
+                  {showDrawConfirm && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 p-4 rounded-xl border border-white/10 bg-slate-900 shadow-2xl flex flex-col items-center gap-3 text-center min-w-[160px]"
+                    >
+                      {/* Arrow/Triangle pointing to the button */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-px"></div>
+
+                      <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
+                        Offer Draw?
+                      </p>
+                      <div className="flex gap-2 w-full">
+                        <button
+                          onClick={confirmOfferDraw}
+                          className="flex-1 py-1.5 bg-primary hover:bg-primary/80 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(59,130,246,0.2)] font-black"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setShowDrawConfirm(false)}
+                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

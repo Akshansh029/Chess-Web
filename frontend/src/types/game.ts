@@ -28,6 +28,7 @@ export enum GameTerminationReason {
   STALEMATE = "STALEMATE",
   INSUFFICIENT_MATERIAL = "INSUFFICIENT_MATERIAL",
   REPETITION = "REPETITION",
+  DRAW_ACCEPTED = "DRAW_ACCEPTED",
 }
 
 export interface Move {
@@ -53,6 +54,7 @@ export interface GameSession {
   startedAt?: string;
   result?: GameResult | null;
   terminationReason?: GameTerminationReason | null;
+  drawOfferBy?: string | null;
 }
 
 export interface ChatMessage {

@@ -154,6 +154,62 @@ export const useWebSocket = () => {
     []
   );
 
+  const sendDrawOffer = useCallback(
+    (
+      gameId: string,
+      playerId: string,
+      playerName: string,
+      opponentId: string,
+      opponentName: string
+    ) => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/game.draw.offer",
+          body: JSON.stringify({
+            gameId,
+            playerId,
+            playerName,
+            opponentId,
+            opponentName,
+          }),
+        });
+      }
+    },
+    []
+  );
+
+  const sendDrawAccept = useCallback(
+    (gameId: string, offerAccepterByPlayerId: string, offerAcceptedByPlayerName: string) => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/game.draw.accept",
+          body: JSON.stringify({
+            gameId,
+            offerAccepterByPlayerId,
+            offerAcceptedByPlayerName,
+          }),
+        });
+      }
+    },
+    []
+  );
+
+  const sendDrawDecline = useCallback(
+    (gameId: string, offerAccepterByPlayerId: string, offerAcceptedByPlayerName: string) => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/game.draw.decline",
+          body: JSON.stringify({
+            gameId,
+            offerAccepterByPlayerId,
+            offerAcceptedByPlayerName,
+          }),
+        });
+      }
+    },
+    []
+  );
+
   return {
     messages,
     gameSession,
@@ -164,6 +220,9 @@ export const useWebSocket = () => {
     sendMessage,
     sendMove,
     sendResign,
+    sendDrawOffer,
+    sendDrawAccept,
+    sendDrawDecline,
     subscribeToGame,
     unsubscribeFromGame,
   };
