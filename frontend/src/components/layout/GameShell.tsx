@@ -32,7 +32,7 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
             </div>
             <div>
               <h1 className="text-xl font-black italic tracking-tighter text-white">
-                LIVE CHESS{" "}
+                CHESS WEB{" "}
                 <span className="text-[10px] not-italic font-bold bg-white/5 px-1.5 py-0.5 rounded text-foreground/40 ml-2 border border-white/5 uppercase">
                   Beta 2.0
                 </span>

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Live Chess | Real-time Strategy",
+  title: "Chess Web | Real-time Strategy",
   description:
     "High-performance real-time multiplayer chess platform built with Spring Boot and Next.js.",
 };

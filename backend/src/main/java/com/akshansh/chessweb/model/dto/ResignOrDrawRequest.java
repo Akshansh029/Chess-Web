@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResignRequest {
+public class ResignDrawRequest {
     @NotBlank
     private UUID gameId;
 
