@@ -2,8 +2,8 @@ package com.akshansh.chessweb.controller;
 
 import com.akshansh.chessweb.exception.GameNotFoundException;
 import com.akshansh.chessweb.exception.PlayerNotInGameException;
-import com.akshansh.chessweb.model.GameSession;
-import com.akshansh.chessweb.model.Move;
+import com.akshansh.chessweb.model.entity.GameSession;
+import com.akshansh.chessweb.model.entity.Move;
 import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;

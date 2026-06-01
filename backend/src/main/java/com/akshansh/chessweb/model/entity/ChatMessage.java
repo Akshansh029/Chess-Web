@@ -1,4 +1,4 @@
-package com.akshansh.chessweb.model;
+package com.akshansh.chessweb.model.entity;
 
 import com.akshansh.chessweb.model.enums.MessageType;
 import lombok.*;

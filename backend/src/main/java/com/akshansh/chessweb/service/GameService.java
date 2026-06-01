@@ -1,7 +1,7 @@
 package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.exception.ResourceNotFoundException;
-import com.akshansh.chessweb.model.GameSession;
+import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.CreateGameReqDto;
 import com.akshansh.chessweb.model.dto.JoinGameReqDto;
 import com.akshansh.chessweb.model.enums.Color;
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.akshansh.chessweb.utils.ChessConstants.STALEMATE_FEN;
 import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
 
 @Service

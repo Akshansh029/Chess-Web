@@ -1,4 +1,4 @@
-package com.akshansh.chessweb.model;
+package com.akshansh.chessweb.model.entity;
 
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
@@ -31,7 +31,4 @@ public class GameSession {
     private Color currentTurn;
     private List<Move> moveHistory;
     private UUID drawOfferBy;
-
-    private String whiteSessionId;   // Spring WS session ID
-    private String blackSessionId;
 }

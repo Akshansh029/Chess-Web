@@ -1,6 +1,6 @@
 package com.akshansh.chessweb.service;
 
-import com.akshansh.chessweb.model.GameSession;
+import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.MoveDto;
 import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;

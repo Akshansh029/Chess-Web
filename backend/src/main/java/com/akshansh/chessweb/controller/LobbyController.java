@@ -1,6 +1,6 @@
 package com.akshansh.chessweb.controller;
 
-import com.akshansh.chessweb.model.GameSession;
+import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.CreateGameReqDto;
 import com.akshansh.chessweb.model.dto.JoinGameReqDto;
 import com.akshansh.chessweb.service.GameService;
