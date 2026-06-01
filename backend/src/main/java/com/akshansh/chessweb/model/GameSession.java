@@ -30,6 +30,7 @@ public class GameSession {
     private String currentFen;
     private Color currentTurn;
     private List<Move> moveHistory;
+    private UUID drawOfferBy;
 
     private String whiteSessionId;   // Spring WS session ID
     private String blackSessionId;

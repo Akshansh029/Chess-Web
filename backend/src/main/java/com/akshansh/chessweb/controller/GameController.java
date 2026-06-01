@@ -2,23 +2,19 @@ package com.akshansh.chessweb.controller;
 
 import com.akshansh.chessweb.exception.GameNotFoundException;
 import com.akshansh.chessweb.exception.PlayerNotInGameException;
-import com.akshansh.chessweb.model.ChatMessage;
 import com.akshansh.chessweb.model.GameSession;
 import com.akshansh.chessweb.model.Move;
-import com.akshansh.chessweb.model.dto.MoveRequest;
-import com.akshansh.chessweb.model.dto.MoveResult;
-import com.akshansh.chessweb.model.dto.ResignRequest;
+import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import com.akshansh.chessweb.model.enums.GameTerminationReason;
 import com.akshansh.chessweb.service.GameStore;
 import com.akshansh.chessweb.service.MoveValidatorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -33,7 +29,7 @@ public class GameController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/game.move")
-    public void handleMove(@Payload MoveRequest request) {
+    public void handleMove(@Payload @Valid MoveRequest request) {
 
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
@@ -62,6 +58,7 @@ public class GameController {
         session.getMoveHistory().add(moveRecord);
         session.setCurrentFen(result.getNewFen());
         session.setCurrentTurn(request.getColor().equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
+        session.setDrawOfferBy(null); // Any move declines the draw offer
 
         // Check if game over
         if (result.isCheckmate() || result.isStalemate() || result.isInsufficientMaterial() || result.isRepetition()) {
@@ -88,7 +85,7 @@ public class GameController {
     }
 
     @MessageMapping("/game.resign")
-    public void resignGame(@Payload ResignRequest request){
+    public void resignGame(@Payload @Valid ResignRequest request){
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
 
@@ -109,5 +106,54 @@ public class GameController {
                 "/topic/game." + session.getId(),
                 session
         );
+    }
+
+    @MessageMapping("/game.draw.offer")
+    public void offerDraw(@Payload @Valid DrawOfferRequest request){
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        if(!request.getPlayerId().equals(session.getWhitePlayerId()) && !request.getPlayerId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException(
+                    "Player " + request.getPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5)
+            );
+        }
+
+        session.setDrawOfferBy(request.getPlayerId());
+        messagingTemplate.convertAndSend("/topic/game." + request.getGameId(), session);
+    }
+
+    @MessageMapping("/game.draw.accept")
+    public void acceptDraw(@Payload @Valid DrawOfferAcceptRequest request){
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        if(!request.getOfferAccepterByPlayerId().equals(session.getWhitePlayerId()) && !request.getOfferAccepterByPlayerId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException(
+                    "Player " + request.getOfferAcceptedByPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5)
+            );
+        }
+
+        session.setStatus(GameStatus.ENDED);
+        session.setResult(GameResult.DRAW);
+        session.setTerminationReason(GameTerminationReason.DRAW_ACCEPTED);
+        session.setDrawOfferBy(null);
+
+        messagingTemplate.convertAndSend("/topic/game." + request.getGameId(), session);
+    }
+
+    @MessageMapping("/game.draw.decline")
+    public void declineDraw(@Payload @Valid DrawOfferAcceptRequest request){
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        if(!request.getOfferAccepterByPlayerId().equals(session.getWhitePlayerId()) && !request.getOfferAccepterByPlayerId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException(
+                    "Player " + request.getOfferAcceptedByPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5)
+            );
+        }
+
+        session.setDrawOfferBy(null);
+        messagingTemplate.convertAndSend("/topic/game." + request.getGameId(), session);
     }
 }

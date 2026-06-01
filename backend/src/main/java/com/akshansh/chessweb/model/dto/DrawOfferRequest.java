@@ -1,6 +1,5 @@
 package com.akshansh.chessweb.model.dto;
 
-import com.akshansh.chessweb.model.enums.Color;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -11,17 +10,22 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class MoveRequest {
+public class DrawOfferRequest {
     @NotNull
     private UUID gameId;
 
     @NotNull
     private UUID playerId;
 
-    private MoveDto move;
+    @NotBlank
+    private String playerName;
 
-    private Color color;
+    @NotNull
+    private UUID opponentId;
+
+    @NotBlank
+    private String opponentName;
 }
