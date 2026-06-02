@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -53,4 +55,11 @@ public class User {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @OneToMany(mappedBy = "whitePlayer", fetch = FetchType.LAZY)
+    private Set<Game> gamesAsWhite = new HashSet<>();
+
+    @OneToMany(mappedBy = "blackPlayer", fetch = FetchType.LAZY)
+    private Set<Game> gamesAsBlack = new HashSet<>();
+
 }

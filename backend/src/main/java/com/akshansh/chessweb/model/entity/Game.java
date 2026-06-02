@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,23 +28,28 @@ public class Game {
     private UUID id;
 
     @NotNull
-    @Column(name = "white_player_id", nullable = false)
-    private UUID whitePlayerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "white_player_id", nullable = false)
+    private User whitePlayer;
 
-    @Column(name = "black_player_id")
-    private UUID blackPlayerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "black_player_id")
+    private User blackPlayer;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "status", nullable = false, columnDefinition = "game_status")
     private GameStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "result")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "result", columnDefinition = "game_result")
     private GameResult result;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "termination_reason")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "termination_reason", columnDefinition = "termination_reason")
     private GameTerminationReason terminationReason;
 
     @Column(name = "pgn")
@@ -52,7 +59,7 @@ public class Game {
     private String finalFen;
 
     @Column(name = "total_moves")
-    private int totalMoves;
+    private Integer totalMoves;
 
     @NotNull
     @Column(name = "started_at", nullable = false, updatable = false)

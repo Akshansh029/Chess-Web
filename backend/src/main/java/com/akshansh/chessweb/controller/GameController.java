@@ -9,6 +9,7 @@ import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import com.akshansh.chessweb.model.enums.GameTerminationReason;
+import com.akshansh.chessweb.service.GamePersistenceService;
 import com.akshansh.chessweb.service.GameStore;
 import com.akshansh.chessweb.service.MoveValidatorService;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class GameController {
     private final GameStore gameStore;
     private final MoveValidatorService moveValidator;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GamePersistenceService gamePersistenceService;
 
     @MessageMapping("/game.move")
     public void handleMove(@Payload @Valid MoveRequest request) {
@@ -75,6 +77,12 @@ public class GameController {
             session.setStatus(GameStatus.ENDED);
             session.setResult(result.isCheckmate() ? request.getColor() == Color.WHITE ? GameResult.WHITE_WON : GameResult.BLACK_WON : GameResult.DRAW);
             session.setTerminationReason(terminationReason);
+
+            // save the game session
+            gamePersistenceService.persist(session);
+
+            // Free memory from game store
+            gameStore.remove(session.getId().toString());
         }
 
         // Broadcast updated state

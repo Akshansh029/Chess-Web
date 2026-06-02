@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.time.Instant;
 
@@ -18,7 +20,7 @@ import java.time.Instant;
 @Table(name = "moves")
 public class MoveRecord {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +31,8 @@ public class MoveRecord {
     private int moveNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "color", nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "color", nullable = false, columnDefinition = "piece_color")
     private Color color;
 
     @Column(name = "from_square", nullable = false)
@@ -39,11 +42,13 @@ public class MoveRecord {
     private String toSquare;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "piece", nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "piece", nullable = false, columnDefinition = "piece_type")
     private PieceType piece;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "promotion_piece")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "promotion_piece", columnDefinition = "piece_type")
     private PieceType promotionPiece;
 
     @Column(name = "is_capture", nullable = false)
