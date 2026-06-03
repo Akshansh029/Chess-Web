@@ -8,17 +8,17 @@ import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.model.enums.GameStatus;
+import com.akshansh.chessweb.model.enums.PieceType;
 import com.akshansh.chessweb.model.enums.GameTerminationReason;
 import com.akshansh.chessweb.service.GamePersistenceService;
 import com.akshansh.chessweb.service.GameStore;
 import com.akshansh.chessweb.service.MoveValidatorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-
 import java.time.Instant;
 
 @Controller
@@ -42,12 +42,22 @@ public class GameController {
             return; // invalid move
         }
 
+        PieceType promotionPiece = null;
+        if (request.getMove().getPromotionPiece() != null && !request.getMove().getPromotionPiece().isBlank()) {
+            try {
+                promotionPiece = PieceType.valueOf(request.getMove().getPromotionPiece().toUpperCase());
+            } catch (IllegalArgumentException e) {
+
+            }
+        }
+
         MoveRecord moveRecord = MoveRecord.builder()
                 .moveNumber(session.getMoveRecordHistory().size() / 2 + 1)
                 .color(request.getColor())
                 .fromSquare(request.getMove().getFrom())
                 .toSquare(request.getMove().getTo())
                 .piece(request.getMove().getPiece())
+                .promotionPiece(promotionPiece)
                 .sanNotation(result.getSan())
                 .fenAfter(result.getNewFen())
                 .isCheck(result.isCheck())
