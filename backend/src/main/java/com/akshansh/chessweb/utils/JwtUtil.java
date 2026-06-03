@@ -1,6 +1,6 @@
 package com.akshansh.chessweb.utils;
 
-import com.akshansh.timecapsulebackend.model.entity.UserPrincipal;
+import com.akshansh.chessweb.model.entity.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

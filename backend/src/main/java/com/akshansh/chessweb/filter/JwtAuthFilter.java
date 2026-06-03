@@ -17,6 +17,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import jakarta.servlet.http.Cookie;
+import java.util.Arrays;
 import java.io.IOException;
 
 @Component
@@ -38,17 +40,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Read authorization header
-        String authHeader = request.getHeader("Authorization");
+        String token = null;
 
-        // If no bearer token, then skip this filter
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+        // Try to get token from HTTP-only cookie
+        if (request.getCookies() != null) {
+            token = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "accessToken".equals(cookie.getName()))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .orElse(null);
+        }
+
+        // Fallback: Read authorization header
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        // If no token found, skip auth validation and pass to next filter
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Extract token
-        String token = authHeader.substring(7);
 
         // Validate jwt token
         try{

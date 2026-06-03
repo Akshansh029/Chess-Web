@@ -62,4 +62,13 @@ public class User {
     @OneToMany(mappedBy = "blackPlayer", fetch = FetchType.LAZY)
     private Set<Game> gamesAsBlack = new HashSet<>();
 
+    public User(String username, String email, String passwordHash, int eloRating, Instant now) {
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.eloRating = eloRating;
+        this.isActive = true;
+        this.createdAt = now;
+    }
+
 }

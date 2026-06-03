@@ -59,6 +59,7 @@ public class SecurityConfig {
                         request
                                 .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
                                 .requestMatchers("/auth/**").permitAll()     // leave auth requests open
+                                .requestMatchers("/ws/**").permitAll()       // permit websocket handshake
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/docs/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()

@@ -22,9 +22,6 @@ public class GameSession {
     private GameStatus status;
     private GameResult result;
     private GameTerminationReason terminationReason;
-//    private String pgn;
-//    private int totalMoves;
-//    private Instant endedAt;
     private Instant startedAt;
 
     private String currentFen;
