@@ -1,6 +1,7 @@
 package com.akshansh.chessweb.config;
 
 import com.akshansh.chessweb.filter.JwtAuthFilter;
+import com.akshansh.chessweb.filter.RequestLoggingFilter;
 import com.akshansh.chessweb.utils.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +41,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final UserDetailsService userDetailsService;
     private final JwtAuthFilter jwtAuthFilter;
-//    private final RequestLoggingFilter requestLoggingFilter;
+    private final RequestLoggingFilter requestLoggingFilter;
 
     // AuthProvider
     @Bean
@@ -57,8 +58,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)      // CSRF token disabled
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
-                                .requestMatchers("/auth/**").permitAll()     // leave auth requests open
+                                .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
+                                .requestMatchers("/api/auth/**").permitAll()     // leave auth requests open
                                 .requestMatchers("/ws/**").permitAll()       // permit websocket handshake
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/docs/**").permitAll()
@@ -69,7 +70,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterAfter(requestLoggingFilter, JwtAuthFilter.class)
+                .addFilterAfter(requestLoggingFilter, JwtAuthFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint));
 
