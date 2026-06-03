@@ -115,6 +115,8 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     );
   }
 
+  console.log(session);
+
   const isWaiting = session.status === GameStatus.WAITING;
   const isGameActive = session.status === GameStatus.ACTIVE;
   const opponentName =
@@ -173,7 +175,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
       {/* Right Column (Moves Record & Commands) */}
       <div className="lg:col-span-3 space-y-6">
-        <MoveHistoryTable moves={session.moveHistory || []} />
+        <MoveHistoryTable moves={session.moveRecordHistory || []} />
 
         <div className="glass-card p-6 border-white/5 space-y-6">
           <div className="flex justify-between items-center border-b border-white/5 pb-2">
@@ -354,12 +356,14 @@ const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
   // Group moves into pairs (White / Black)
   const pairs = [];
   for (let i = 0; i < moves.length; i += 2) {
+    const w = moves[i];
+    const b = moves[i + 1];
     pairs.push({
       moveNumber: Math.floor(i / 2) + 1,
-      white: moves[i]?.sanNotation || `${moves[i]?.from}→${moves[i]?.to}`,
-      black:
-        moves[i + 1]?.sanNotation ||
-        (moves[i + 1] ? `${moves[i + 1]?.from}→${moves[i + 1]?.to}` : ""),
+      white: w?.sanNotation || `${w?.fromSquare || w?.from || ""}→${w?.toSquare || w?.to || ""}`,
+      black: b
+        ? b.sanNotation || `${b.fromSquare || b.from || ""}→${b.toSquare || b.to || ""}`
+        : "",
     });
   }
 

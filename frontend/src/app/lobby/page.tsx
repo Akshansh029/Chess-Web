@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import Lobby from "@/components/lobby/Lobby";
 import { useGame } from "@/context/GameContext";
+import { useToast } from "@/context/ToastContext";
 import { gameApi } from "@/services/api";
 import { Color } from "@/types/game";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ export default function LobbyPage() {
     connected,
     connect,
   } = useGame();
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -37,10 +39,11 @@ export default function LobbyPage() {
         playerName,
         playerColor,
       );
+      toast.success("Game arena created! Waiting for opponent.");
       router.push(`/game/${gameId}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to create game arena");
+      toast.error(err.message || "Failed to create game arena.");
     }
   };
 
@@ -56,10 +59,11 @@ export default function LobbyPage() {
         myJoinColor,
       );
       setGameSession(session);
+      toast.success("Joined arena successfully.");
       router.push(`/game/${gameId}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to join arena. It may have been filled or closed.");
+      toast.error(err.message || "Failed to join arena. It may have been filled or closed.");
     }
   };
 

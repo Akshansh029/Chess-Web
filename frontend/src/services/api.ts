@@ -1,6 +1,11 @@
 import { Color, GameSession } from "@/types/game";
+import { parseBackendError } from "@/utils/error";
 
 const API_BASE_URL = "http://localhost:8080/api/games";
+
+const getHeaders = () => {
+  return { "Content-Type": "application/json" };
+};
 
 export const gameApi = {
   createGame: async (
@@ -10,10 +15,13 @@ export const gameApi = {
   ): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders(),
       body: JSON.stringify({ playerId, playerName, playerColor }),
+      credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to create game");
+    if (!response.ok) {
+      throw await parseBackendError(response);
+    }
     return await response.json();
   },
 
@@ -25,16 +33,24 @@ export const gameApi = {
   ): Promise<GameSession> => {
     const response = await fetch(`${API_BASE_URL}/join`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders(),
       body: JSON.stringify({ gameId, playerId, playerName, playerColor }),
+      credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to join game");
+    if (!response.ok) {
+      throw await parseBackendError(response);
+    }
     return await response.json();
   },
 
   getWaitingGames: async (): Promise<GameSession[]> => {
-    const response = await fetch(`${API_BASE_URL}/waiting`);
-    if (!response.ok) throw new Error("Failed to fetch waiting games");
+    const response = await fetch(`${API_BASE_URL}/waiting`, {
+      headers: getHeaders(),
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw await parseBackendError(response);
+    }
     return await response.json();
   },
 };

@@ -2,7 +2,9 @@
 
 import React, { ReactNode } from "react";
 import { useGame } from "@/context/GameContext";
-import { Trophy, History, MessageSquare, Zap } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Trophy, LogOut, User } from "lucide-react";
+import Link from "next/link";
 
 interface GameShellProps {
   children: ReactNode;
@@ -10,6 +12,9 @@ interface GameShellProps {
 
 export const GameShell: React.FC<GameShellProps> = ({ children }) => {
   const { connected, playerName } = useGame();
+  const { user, logout, isAuthenticated } = useAuth();
+
+  const displayName = user ? user.name : playerName;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col font-sans selection:bg-primary selection:text-white">
@@ -27,21 +32,23 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
       <header className="relative z-50 border-b border-white/5 bg-black/20 backdrop-blur-md">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
-              <Trophy className="text-primary w-5 h-5 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black italic tracking-tighter text-white">
-                CHESS WEB{" "}
-                <span className="text-[10px] not-italic font-bold bg-white/5 px-1.5 py-0.5 rounded text-foreground/40 ml-2 border border-white/5 uppercase">
-                  Beta 2.0
-                </span>
-              </h1>
-            </div>
+            <Link href="/" className="flex items-center gap-4 hover:opacity-90 transition-opacity">
+              <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
+                <Trophy className="text-primary w-5 h-5 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black italic tracking-tighter text-white flex items-center">
+                  CHESS WEB{" "}
+                  <span className="text-[10px] not-italic font-bold bg-white/5 px-1.5 py-0.5 rounded text-foreground/40 ml-2 border border-white/5 uppercase">
+                    Beta 2.0
+                  </span>
+                </h1>
+              </div>
+            </Link>
           </div>
 
           <div className="flex items-center gap-6">
-            {playerName && (
+            {displayName && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
                 <div
                   className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]" : "bg-red-500 shadow-[0_0_5px_#ef4444]"}`}
@@ -51,21 +58,51 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
                 </span>
               </div>
             )}
-            {playerName && (
-              <div className="hidden md:flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.2em]">
-                    Strategist
-                  </p>
-                  <p className="text-xs font-black uppercase text-white tracking-widest">
-                    {playerName}
-                  </p>
+            
+            {displayName && (
+              <div className="flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.2em]">
+                      {isAuthenticated ? "Grandmaster" : "Guest Strategist"}
+                    </p>
+                    <p className="text-xs font-black uppercase text-white tracking-widest">
+                      {displayName}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                    <span className="text-xs font-black text-primary uppercase">
+                      {displayName.substring(0, 2)}
+                    </span>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                  <span className="text-xs font-black text-primary uppercase">
-                    {playerName.substring(0, 2)}
-                  </span>
-                </div>
+
+                {isAuthenticated && (
+                  <button
+                    onClick={logout}
+                    className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-red-500/10 hover:border-red-500/20 text-foreground/40 hover:text-red-400 transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
+                    title="Sign Out"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!displayName && (
+              <div className="flex gap-3">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-foreground/60 hover:text-white transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-xl bg-primary/20 border border-primary/30 text-xs font-black uppercase tracking-widest text-white hover:bg-primary/30 transition-all"
+                >
+                  Register
+                </Link>
               </div>
             )}
           </div>

@@ -36,6 +36,10 @@ export default function ChessBoardWrapper() {
   const [optionSquares, setOptionSquares] = React.useState<
     Record<string, React.CSSProperties>
   >({});
+  const [promotionPending, setPromotionPending] = React.useState<{
+    from: string;
+    to: string;
+  } | null>(null);
 
   const isMyTurn = gameSession?.currentTurn === playerColor;
   const isGameActive = gameSession?.status === GameStatus.ACTIVE;
@@ -153,7 +157,7 @@ export default function ChessBoardWrapper() {
     setMoveFrom(null);
     setOptionSquares({});
 
-    if (!targetSquare) return false;
+    if (!targetSquare || sourceSquare === targetSquare) return false;
     if (!isGameActive) return false;
     if (!isMyTurn) return false;
 
@@ -171,13 +175,22 @@ export default function ChessBoardWrapper() {
     const isPromotionRank =
       (playerColor === Color.WHITE && targetSquare.endsWith("8")) ||
       (playerColor === Color.BLACK && targetSquare.endsWith("1"));
-    const promotion = isPawn && isPromotionRank ? "q" : undefined;
+
+    let isLegal = false;
+    try {
+      const moves = game.moves({ square: sourceSquare as any, verbose: true });
+      isLegal = moves.some((m) => m.to === targetSquare);
+    } catch (e) {}
+
+    if (isPawn && isPromotionRank && isLegal) {
+      setPromotionPending({ from: sourceSquare, to: targetSquare });
+      return false; // prevent immediate default move, show popup
+    }
 
     try {
       const move = game.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion,
       });
 
       if (move) {
@@ -189,11 +202,6 @@ export default function ChessBoardWrapper() {
             from: sourceSquare,
             to: targetSquare,
             piece: move.piece.toUpperCase(),
-            promotionPiece: promotion
-              ? playerColor === Color.WHITE
-                ? "Q"
-                : "q"
-              : undefined,
           },
           playerColor,
         );
@@ -221,7 +229,6 @@ export default function ChessBoardWrapper() {
         const isOurColor =
           (playerColor === Color.WHITE && isWhitePiece) ||
           (playerColor === Color.BLACK && !isWhitePiece);
-
         if (isOurColor) {
           setMoveFrom(square);
           getMoveOptions(square);
@@ -255,13 +262,24 @@ export default function ChessBoardWrapper() {
       const isPromotionRank =
         (playerColor === Color.WHITE && square.endsWith("8")) ||
         (playerColor === Color.BLACK && square.endsWith("1"));
-      const promotion = isPawn && isPromotionRank ? "q" : undefined;
+
+      let isLegal = false;
+      try {
+        const moves = game.moves({ square: moveFrom as any, verbose: true });
+        isLegal = moves.some((m) => m.to === square);
+      } catch (e) {}
+
+      if (isPawn && isPromotionRank && isLegal) {
+        setPromotionPending({ from: moveFrom, to: square });
+        setMoveFrom(null);
+        setOptionSquares({});
+        return;
+      }
 
       try {
         const move = game.move({
           from: moveFrom,
           to: square,
-          promotion,
         });
 
         if (move) {
@@ -273,11 +291,6 @@ export default function ChessBoardWrapper() {
               from: moveFrom,
               to: square,
               piece: move.piece.toUpperCase(),
-              promotionPiece: promotion
-                ? playerColor === Color.WHITE
-                  ? "Q"
-                  : "q"
-                : undefined,
             },
             playerColor,
           );
@@ -290,6 +303,94 @@ export default function ChessBoardWrapper() {
       setMoveFrom(null);
       setOptionSquares({});
     }
+  };
+
+  const handlePromotionSelect = (piece: string) => {
+    if (!promotionPending) return;
+    const { from, to } = promotionPending;
+
+    const game = new Chess(fen);
+    try {
+      const move = game.move({
+        from,
+        to,
+        promotion: piece,
+      });
+
+      if (move) {
+        setFen(game.fen());
+        sendMove(
+          gameSession!.id,
+          playerId,
+          {
+            from,
+            to,
+            piece: move.piece.toUpperCase(),
+            promotionPiece: piece.toUpperCase(),
+          },
+          playerColor,
+        );
+      }
+    } catch (e) {
+      console.error("Promotion move execution failed:", e);
+    } finally {
+      setPromotionPending(null);
+    }
+  };
+
+  const getPromotionOverlayStyle = (
+    square: string,
+    orientation: "white" | "black",
+  ) => {
+    const file = square.charCodeAt(0) - 97; // a=0, b=1, ..., h=7
+    const rank = parseInt(square.charAt(1)) - 1; // 1=0, 2=1, ..., 8=7
+
+    let col = file;
+    let startRow = 0;
+    let direction: "down" | "up" = "down";
+
+    if (orientation === "white") {
+      if (rank === 7) {
+        startRow = 0;
+        direction = "down";
+      } else {
+        startRow = 4;
+        direction = "up";
+      }
+    } else {
+      col = 7 - file;
+      if (rank === 0) {
+        startRow = 0;
+        direction = "down";
+      } else {
+        startRow = 4;
+        direction = "up";
+      }
+    }
+
+    return {
+      left: `${col * 12.5}%`,
+      top: `${startRow * 12.5}%`,
+      width: "12.5%",
+      height: `${12.5 * 4}%`,
+      direction,
+    };
+  };
+
+  const getPromotionPieces = (color: Color) => {
+    return color === Color.WHITE
+      ? [
+          { type: "q", symbol: "♕" },
+          { type: "r", symbol: "♖" },
+          { type: "b", symbol: "♗" },
+          { type: "n", symbol: "♘" },
+        ]
+      : [
+          { type: "q", symbol: "♛" },
+          { type: "r", symbol: "♜" },
+          { type: "b", symbol: "♝" },
+          { type: "n", symbol: "♞" },
+        ];
   };
 
   return (
@@ -311,6 +412,48 @@ export default function ChessBoardWrapper() {
           },
         }}
       />
+
+      {/* Dimmed backdrop when promotion is pending */}
+      {promotionPending && (
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-[1.5px] z-40 cursor-pointer"
+          onClick={() => setPromotionPending(null)}
+        />
+      )}
+
+      {/* Glassmorphic Promotion Selection Overlay */}
+      {promotionPending &&
+        (() => {
+          const overlay = getPromotionOverlayStyle(
+            promotionPending.to,
+            playerColor === Color.WHITE ? "white" : "black",
+          );
+          const pieces = getPromotionPieces(playerColor);
+          const orderedPieces =
+            overlay.direction === "up" ? [...pieces].reverse() : pieces;
+
+          return (
+            <div
+              className="absolute z-50 flex flex-col rounded-lg overflow-hidden border border-white/20 shadow-2xl bg-slate-950/95 backdrop-blur-md"
+              style={{
+                left: overlay.left,
+                top: overlay.top,
+                width: overlay.width,
+                height: overlay.height,
+              }}
+            >
+              {orderedPieces.map((p) => (
+                <button
+                  key={p.type}
+                  onClick={() => handlePromotionSelect(p.type)}
+                  className="w-full h-1/4 flex items-center justify-center hover:bg-primary/75 text-white text-3xl font-black transition-all cursor-pointer border-b border-white/10 last:border-b-0 hover:scale-105 active:scale-95"
+                >
+                  {p.symbol}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
     </div>
   );
 }
