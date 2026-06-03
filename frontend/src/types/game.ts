@@ -39,6 +39,8 @@ export interface Move {
   moveNumber?: number;
   color?: Color;
   sanNotation?: string;
+  fromSquare?: string;
+  toSquare?: string;
 }
 
 export interface GameSession {
@@ -50,7 +52,7 @@ export interface GameSession {
   status: GameStatus;
   currentFen: string;
   currentTurn: Color;
-  moveHistory: Move[];
+  moveRecordHistory: Move[];
   startedAt?: string;
   result?: GameResult | null;
   terminationReason?: GameTerminationReason | null;

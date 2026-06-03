@@ -46,7 +46,7 @@ public class MoveValidatorService {
         }
 
         MoveDto dto = request.getMove();
-        Move move = buildMove(dto);
+        Move move = buildMove(board, dto);
         if (move == null) {
             return invalid("MALFORMED_MOVE");
         }
@@ -86,14 +86,20 @@ public class MoveValidatorService {
         }
     }
 
-    private Move buildMove(MoveDto dto) {
+    private Move buildMove(Board board, MoveDto dto) {
         try {
             Square from = Square.fromValue(dto.getFrom().toUpperCase()); // "e2" → E2
             Square to   = Square.fromValue(dto.getTo().toUpperCase());   // "e4" → E4
 
-            if (dto.getPromotionPiece() != null) {
-                // Promotion: e.g. "e7" → "e8" with "Q"
-                Piece promo = Piece.fromFenSymbol(dto.getPromotionPiece());
+            if (dto.getPromotionPiece() != null && !dto.getPromotionPiece().isEmpty()) {
+                Side side = board.getPiece(from).getPieceSide();
+                String symbol = dto.getPromotionPiece().toUpperCase();
+                Piece promo;
+                if (side == Side.WHITE) {
+                    promo = Piece.fromFenSymbol(symbol);
+                } else {
+                    promo = Piece.fromFenSymbol(symbol.toLowerCase());
+                }
                 return new Move(from, to, promo);
             }
 
@@ -126,8 +132,20 @@ public class MoveValidatorService {
             Square from = Square.fromValue(moveRecord.getFromSquare().toUpperCase());
             Square to   = Square.fromValue(moveRecord.getToSquare().toUpperCase());
 
-            if (moveRecord.getPromotionPiece() != null && !moveRecord.getPromotionPiece().toString().isEmpty()) {
-                Piece promo = Piece.fromFenSymbol(moveRecord.getPromotionPiece().toString());
+            if (moveRecord.getPromotionPiece() != null) {
+                boolean isWhite = moveRecord.getColor() == Color.WHITE;
+                String symbol = "";
+                switch (moveRecord.getPromotionPiece()) {
+                    case Q: symbol = "q"; break;
+                    case R: symbol = "r"; break;
+                    case B: symbol = "b"; break;
+                    case N: symbol = "n"; break;
+                    default: break;
+                }
+                if (isWhite) {
+                    symbol = symbol.toUpperCase();
+                }
+                Piece promo = Piece.fromFenSymbol(symbol);
                 return new Move(from, to, promo);
             }
 

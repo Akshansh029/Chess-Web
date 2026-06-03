@@ -15,12 +15,15 @@ import com.akshansh.chessweb.service.GameStore;
 import com.akshansh.chessweb.service.MoveValidatorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import java.time.Instant;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class GameController {
@@ -39,6 +42,10 @@ public class GameController {
         // Validate the move using chess rules
         MoveResult result = moveValidator.validate(session, request);
         if (!result.isValid()) {
+            messagingTemplate.convertAndSend(
+                    "/topic/game." + session.getId(),
+                    session
+            );
             return; // invalid move
         }
 
@@ -47,7 +54,7 @@ public class GameController {
             try {
                 promotionPiece = PieceType.valueOf(request.getMove().getPromotionPiece().toUpperCase());
             } catch (IllegalArgumentException e) {
-
+                log.error("event=pawnPromotionFailed userId={}", MDC.get("userId"));
             }
         }
 
