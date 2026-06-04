@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { GameSession, Color } from "@/types/game";
 import { gameApi } from "@/services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Swords, Play, Clock, RefreshCw } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 interface LobbyProps {
   onJoinGame: (gameId: string, hostColor: Color) => void;
@@ -14,30 +15,31 @@ interface LobbyProps {
 const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
   const [games, setGames] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMounted = useRef(true);
+
+  const { toast } = useToast();
 
   const fetchGames = async () => {
     setLoading(true);
     try {
       const waitingGames = await gameApi.getWaitingGames();
-      setGames(waitingGames);
+      if (isMounted.current) {
+        setGames(waitingGames);
+      }
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    let active = true;
-    const loadGames = async () => {
-      const waitingGames = await gameApi.getWaitingGames();
-      if (active) setGames(waitingGames);
-    };
-    loadGames();
-    const interval = setInterval(fetchGames, 5000);
+    isMounted.current = true;
+    fetchGames();
     return () => {
-      active = false;
-      clearInterval(interval);
+      isMounted.current = false;
     };
   }, []);
 

@@ -3,7 +3,7 @@
 import React, { ReactNode } from "react";
 import { useGame } from "@/context/GameContext";
 import { useAuth } from "@/context/AuthContext";
-import { Trophy, LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,14 +12,19 @@ interface GameShellProps {
   showNavbar?: boolean;
 }
 
-export const GameShell: React.FC<GameShellProps> = ({ children, showNavbar = true }) => {
+export const GameShell: React.FC<GameShellProps> = ({
+  children,
+  showNavbar = true,
+}) => {
   const { connected } = useGame();
   const { user, logout, isAuthenticated } = useAuth();
 
   const displayName = isAuthenticated && user ? user.name : null;
 
   return (
-    <div className={`${showNavbar ? "min-h-screen" : "h-screen overflow-hidden"} bg-background relative overflow-hidden flex flex-col font-sans selection:bg-primary selection:text-white`}>
+    <div
+      className={`${showNavbar ? "min-h-screen" : "h-screen overflow-hidden"} bg-background relative overflow-hidden flex flex-col font-sans selection:bg-primary selection:text-white`}
+    >
       {/* Dynamic Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[140px] animate-pulse"></div>
@@ -50,10 +55,8 @@ export const GameShell: React.FC<GameShellProps> = ({ children, showNavbar = tru
                 </div>
                 <div>
                   <h1 className="text-lg font-light tracking-tight text-white flex items-center">
-                    Chess <span className="font-semibold text-primary ml-1">Web</span>
-                    <span className="text-[9px] font-medium bg-white/5 px-1.5 py-0.5 rounded text-foreground/40 ml-2 border border-white/5 uppercase tracking-wider">
-                      Beta 2.0
-                    </span>
+                    Chess{" "}
+                    <span className="font-semibold text-primary ml-1">Web</span>
                   </h1>
                 </div>
               </Link>
@@ -126,7 +129,9 @@ export const GameShell: React.FC<GameShellProps> = ({ children, showNavbar = tru
       )}
 
       {/* Main Content */}
-      <main className={`relative z-10 flex-1 flex flex-col items-center justify-center ${showNavbar ? "p-4 overflow-y-auto" : "overflow-hidden w-full h-full"}`}>
+      <main
+        className={`relative z-10 flex-1 flex flex-col items-center justify-center ${showNavbar ? "p-4 overflow-y-auto" : "overflow-hidden w-full h-full"}`}
+      >
         {children}
       </main>
     </div>

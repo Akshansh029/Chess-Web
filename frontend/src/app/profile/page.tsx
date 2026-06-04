@@ -20,9 +20,9 @@ import {
   ArrowLeft,
   Swords,
   Gamepad2,
-  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { accessToken, isAuthenticated, isLoading } = useAuth();
@@ -30,7 +30,8 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<UserProfileDto | null>(null);
-  const [gamesData, setGamesData] = useState<PageResponse<GameHistoryDto> | null>(null);
+  const [gamesData, setGamesData] =
+    useState<PageResponse<GameHistoryDto> | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -147,7 +148,10 @@ export default function ProfilePage() {
             href="/lobby"
             className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground/40 hover:text-white transition-colors cursor-pointer group"
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft
+              size={16}
+              className="group-hover:-translate-x-0.5 transition-transform"
+            />
             Back to Lobby
           </Link>
         </div>
@@ -168,9 +172,13 @@ export default function ProfilePage() {
               animate={{ opacity: 1, y: 0 }}
               className="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 relative overflow-hidden"
             >
-              <div className="w-20 h-20 rounded-full bg-white/5 border border-primary/20 flex items-center justify-center text-3xl font-light text-primary tracking-wider relative z-10 shadow-inner">
-                {profile.username.substring(0, 2).toUpperCase()}
-              </div>
+              <Image
+                src={"/white-king.jpg"}
+                alt="Profile"
+                width={80}
+                height={80}
+                className="rounded-full border aspect-square object-cover border-primary/20"
+              />
 
               <div className="text-center md:text-left flex-1 relative z-10">
                 <div className="flex flex-col md:flex-row md:items-center gap-3">
@@ -208,7 +216,8 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <h3 className="text-2xl font-light tracking-tight text-white mb-1">
-                Match <span className="font-semibold text-primary">History</span>
+                Match{" "}
+                <span className="font-semibold text-primary">History</span>
               </h3>
               <p className="text-foreground/40 text-sm font-normal">
                 Paging through your chess battles
@@ -223,10 +232,18 @@ export default function ProfilePage() {
                   onChange={handlePageSizeChange}
                   className="bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs outline-none focus:border-primary transition-colors cursor-pointer"
                 >
-                  <option value={5} className="bg-background">5</option>
-                  <option value={10} className="bg-background">10</option>
-                  <option value={20} className="bg-background">20</option>
-                  <option value={50} className="bg-background">50</option>
+                  <option value={5} className="bg-background">
+                    5
+                  </option>
+                  <option value={10} className="bg-background">
+                    10
+                  </option>
+                  <option value={20} className="bg-background">
+                    20
+                  </option>
+                  <option value={50} className="bg-background">
+                    50
+                  </option>
                 </select>
                 <span>matches</span>
               </div>
@@ -246,7 +263,7 @@ export default function ProfilePage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-white/[0.02] border-b border-white/5">
+                      <tr className="bg-white/2 border-b border-white/5">
                         <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
                           Date & Time (IST)
                         </th>
@@ -272,7 +289,8 @@ export default function ProfilePage() {
                     </thead>
                     <tbody className="divide-y divide-white/5 font-normal">
                       {gamesData.content.map((game) => {
-                        const isWhite = profile && game.whitePlayerName === profile.username;
+                        const isWhite =
+                          profile && game.whitePlayerName === profile.username;
                         const opponent = isWhite
                           ? game.blackPlayerName || "Guest"
                           : game.whitePlayerName || "Guest";
@@ -302,7 +320,10 @@ export default function ProfilePage() {
                         }
 
                         return (
-                          <tr key={game.gameId} className="hover:bg-white/[0.01] transition-colors">
+                          <tr
+                            key={game.gameId}
+                            className="hover:bg-white/1 transition-colors"
+                          >
                             <td className="px-6 py-4 text-xs text-white font-medium whitespace-nowrap">
                               {formatToIST(game.endedAt)}
                             </td>
@@ -334,7 +355,9 @@ export default function ProfilePage() {
                             </td>
                             <td className="px-6 py-4 text-xs text-center whitespace-nowrap">
                               <button
-                                onClick={() => copyToClipboard(game.pgn, game.gameId)}
+                                onClick={() =>
+                                  copyToClipboard(game.pgn, game.gameId)
+                                }
                                 className={`p-1.5 rounded border transition-all active:scale-90 ${
                                   copiedGameId === game.gameId
                                     ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
@@ -362,8 +385,8 @@ export default function ProfilePage() {
                 <div className="flex justify-between items-center px-2">
                   <span className="text-xs font-normal text-foreground/40">
                     Showing match {page * pageSize + 1} to{" "}
-                    {Math.min((page + 1) * pageSize, gamesData.totalElements)} of{" "}
-                    {gamesData.totalElements}
+                    {Math.min((page + 1) * pageSize, gamesData.totalElements)}{" "}
+                    of {gamesData.totalElements}
                   </span>
                   <div className="flex gap-2">
                     <button
@@ -400,7 +423,8 @@ export default function ProfilePage() {
                 No matches recorded yet
               </h4>
               <p className="text-foreground/40 text-xs mb-6 max-w-xs text-center font-normal">
-                You haven't completed any strategic arenas. Step into the matchmaking lobby to begin.
+                You haven't completed any strategic arenas. Step into the
+                matchmaking lobby to begin.
               </p>
               <Link
                 href="/lobby"
