@@ -1,6 +1,7 @@
 package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.exception.ResourceNotFoundException;
+import com.akshansh.chessweb.model.dto.GameDto;
 import com.akshansh.chessweb.model.entity.Game;
 import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.entity.MoveRecord;
@@ -9,7 +10,14 @@ import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.repository.GameRepository;
 import com.akshansh.chessweb.repository.MoveRepository;
 import com.akshansh.chessweb.repository.UserRepository;
+import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +27,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.akshansh.chessweb.utils.UserUtil.getCurrentUser;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GamePersistenceService {
@@ -61,10 +72,26 @@ public class GamePersistenceService {
 
         // save moves
         moveRepo.saveAll(session.getMoveRecordHistory());
+        log.info("event=gameSaved userId={} gameId={}", MDC.get("userId"), game.getId());
     }
 
-    private String buildPgn(List<MoveRecord> moves) {
-        if (moves == null || moves.isEmpty()) {
+    @Transactional
+    public Page<GameDto> getAllGamesForUser(int pageNo, int pageSize){
+        UUID currentUserId = getCurrentUser().getUserId();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        Page<GameDto> result = gameRepo.getGamesByWhitePlayerOrBlackPlayer(pageable, currentUserId);
+
+        log.info("event=fetchedAllGamesForUser userId={} page={} size={} gamesCount={} totalPages={}",
+                MDC.get("userId"),
+                pageNo, pageSize, result.getTotalElements(), result.getTotalPages()
+        );
+        return result;
+    }
+
+    private String buildPgn(@NonNull List<MoveRecord> moves) {
+        if (moves.isEmpty()) {
             return "";
         }
 
