@@ -13,7 +13,7 @@ const Chessboard = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full aspect-square bg-slate-900/50 rounded-lg flex items-center justify-center border border-white/10">
-        <span className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-primary animate-pulse">
           Initializing Grid Matrix...
         </span>
       </div>
@@ -446,7 +446,7 @@ export default function ChessBoardWrapper() {
                 <button
                   key={p.type}
                   onClick={() => handlePromotionSelect(p.type)}
-                  className="w-full h-1/4 flex items-center justify-center hover:bg-primary/75 text-white text-3xl font-black transition-all cursor-pointer border-b border-white/10 last:border-b-0 hover:scale-105 active:scale-95"
+                  className="w-full h-1/4 flex items-center justify-center hover:bg-primary/75 text-white text-3xl font-semibold transition-all cursor-pointer border-b border-white/10 last:border-b-0 hover:scale-105 active:scale-95"
                 >
                   {p.symbol}
                 </button>

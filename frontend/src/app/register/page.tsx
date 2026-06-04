@@ -110,12 +110,12 @@ export default function RegisterPage() {
 
           <div className="relative z-10 flex flex-col items-center mb-8 text-center">
             <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4 border border-primary/30 shadow-lg shadow-primary/10">
-              <User className="text-primary w-7 h-7" />
+               <User className="text-primary w-7 h-7" />
             </div>
-            <h2 className="text-2xl font-black tracking-tight text-white uppercase italic">
-              {step === 1 ? "Initialize" : "Verify Email"}
+            <h2 className="text-2xl font-light tracking-tight text-white">
+              {step === 1 ? "Create Account" : "Verify Email"}
             </h2>
-            <p className="text-foreground/50 text-xs font-semibold uppercase tracking-wider mt-1">
+            <p className="text-foreground/40 text-xs font-normal mt-1">
               {step === 1 ? "Enlist as a new strategist" : `Enter code sent to ${email}`}
             </p>
           </div>
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                 className="space-y-4 relative z-10"
               >
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 ml-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 ml-1">
                     Display Codename
                   </label>
                   <div className="relative">
@@ -175,7 +175,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 ml-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 ml-1">
                     Secure Email
                   </label>
                   <div className="relative">
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 ml-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 ml-1">
                     Set Password
                   </label>
                   <div className="relative">
@@ -217,7 +217,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 disabled:opacity-50 text-white font-black py-4 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs border border-white/10 mt-6"
+                  className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs border border-white mt-6 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -239,7 +239,7 @@ export default function RegisterPage() {
                 className="space-y-5 relative z-10"
               >
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/30 ml-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 ml-1">
                     Verification OTP
                   </label>
                   <div className="relative">
@@ -262,7 +262,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 disabled:opacity-50 text-white font-black py-4 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs border border-white/10 mt-6"
+                  className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs border border-white mt-6 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -278,7 +278,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="text-foreground/40 hover:text-white transition-colors flex items-center gap-1.5 font-bold uppercase tracking-wider"
+                    className="text-foreground/40 hover:text-white transition-colors flex items-center gap-1.5 font-semibold uppercase tracking-wider cursor-pointer"
                   >
                     <ArrowLeft size={14} /> Back
                   </button>
@@ -286,7 +286,7 @@ export default function RegisterPage() {
                     type="button"
                     onClick={handleResend}
                     disabled={isLoading}
-                    className="text-primary hover:text-accent font-black transition-colors uppercase tracking-wider"
+                    className="text-primary hover:text-accent font-semibold transition-colors uppercase tracking-wider cursor-pointer"
                   >
                     Resend Code
                   </button>
@@ -300,7 +300,7 @@ export default function RegisterPage() {
               Already registered?{" "}
               <Link
                 href="/login"
-                className="text-primary hover:text-accent font-black transition-colors"
+                className="text-primary hover:text-accent font-semibold transition-colors"
               >
                 Sign In
               </Link>

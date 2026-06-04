@@ -41,10 +41,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
   React.useEffect(() => {
     if (session?.status === GameStatus.ENDED) {
-      const timer = setTimeout(() => {
-        setShowGameOverModal(true);
-      }, 1200); // 1.2 seconds
-      return () => clearTimeout(timer);
+      setShowGameOverModal(true);
     } else {
       setShowGameOverModal(false);
     }
@@ -108,8 +105,8 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-white">
         <Activity className="animate-pulse text-primary mb-4" size={48} />
-        <h3 className="text-xl font-bold uppercase italic tracking-tighter">
-          Synchronizing Strategic Data...
+        <h3 className="text-base font-light tracking-tight text-foreground/50">
+          Waiting for opponent...
         </h3>
       </div>
     );
@@ -176,13 +173,13 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
         <MoveHistoryTable moves={session.moveRecordHistory || []} />
 
         <div className="glass-card p-6 border-white/5 space-y-6">
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">
-              Command Center
-            </h4>
-            <div className="flex items-center gap-1">
+          <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+            <h3 className="text-xl font-light tracking-tight text-white">
+              Game <span className="font-semibold text-primary">Arena</span>
+            </h3>
+            <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              <span className="text-[8px] font-bold text-foreground/50 uppercase tracking-widest">
+              <span className="text-[8px] font-semibold text-foreground/40 uppercase tracking-wider">
                 {session.status}
               </span>
             </div>
@@ -190,22 +187,22 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div className="space-y-1">
-              <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
+              <p className="text-[8px] font-semibold text-foreground/40 uppercase tracking-wider">
                 Active Turn
               </p>
-              <p className="font-black uppercase text-white">
+              <p className="font-semibold uppercase text-white tracking-wider">
                 {session.currentTurn}
               </p>
             </div>
             <div className="space-y-1 text-right">
-              <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
+              <p className="text-[8px] font-semibold text-foreground/40 uppercase tracking-wider">
                 Active Turn
               </p>
               <span className="inline-flex items-center gap-1.5">
                 <span
                   className={`w-2 h-2 rounded-full ${session.currentTurn === Color.WHITE ? "bg-white shadow-[0_0_5px_white]" : "bg-slate-600"}`}
                 ></span>
-                <span className="font-bold text-white uppercase">
+                <span className="font-semibold text-white uppercase tracking-wider">
                   {session.currentTurn}
                 </span>
               </span>
@@ -214,20 +211,20 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
           {session.drawOfferBy && session.drawOfferBy !== playerId ? (
             <div className="p-4 rounded-xl border border-primary/20 bg-slate-900/60 shadow-lg flex flex-col items-center gap-3 text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse flex items-center gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary animate-pulse flex items-center gap-2">
                 <Handshake size={16} />
                 Draw Offered by Opponent
               </p>
               <div className="flex gap-3 w-full">
                 <button
                   onClick={handleAcceptDraw}
-                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[9px] uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(16,185,129,0.2)] font-black"
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-[9px] uppercase tracking-wider text-white transition-all font-semibold cursor-pointer"
                 >
                   Accept
                 </button>
                 <button
                   onClick={handleDeclineDraw}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 border border-white/5 rounded-lg text-[9px] font-semibold uppercase tracking-wider text-white transition-all cursor-pointer"
                 >
                   Decline
                 </button>
@@ -239,7 +236,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
                 <button
                   onClick={() => setShowResignConfirm(true)}
                   disabled={!isGameActive || !!session.drawOfferBy}
-                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 hover:border-red-500/30 transition-all text-red-400 ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-semibold uppercase tracking-wider hover:bg-red-500/10 hover:border-red-500/20 transition-colors text-red-400 cursor-pointer ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   Resign
                   <Flag size={14} className="ml-2" />
@@ -258,19 +255,19 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-px"></div>
 
-                      <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
+                      <p className="text-[9px] font-semibold uppercase tracking-wider text-white select-none whitespace-nowrap">
                         Confirm Resign?
                       </p>
                       <div className="flex gap-2 w-full">
                         <button
                           onClick={confirmResign}
-                          className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(239,68,68,0.2)]"
+                          className="flex-1 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-[9px] font-semibold uppercase tracking-wider text-white transition-all cursor-pointer"
                         >
                           Yes
                         </button>
                         <button
                           onClick={() => setShowResignConfirm(false)}
-                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
+                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-semibold uppercase tracking-wider text-slate-300 transition-all cursor-pointer"
                         >
                           No
                         </button>
@@ -287,7 +284,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
                     }
                   }}
                   disabled={!isGameActive || !!session.drawOfferBy}
-                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 hover:border-primary/30 transition-all text-primary ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full flex items-center justify-center py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-semibold uppercase tracking-wider hover:bg-primary/10 hover:border-primary/20 transition-colors text-primary cursor-pointer ${!isGameActive || !!session.drawOfferBy ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {session.drawOfferBy === playerId
                     ? "Offered..."
@@ -308,19 +305,19 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-900"></div>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/10 -z-10 translate-y-px"></div>
 
-                      <p className="text-[9px] font-black uppercase tracking-wider text-white select-none whitespace-nowrap">
+                      <p className="text-[9px] font-semibold uppercase tracking-wider text-white select-none whitespace-nowrap">
                         Offer Draw?
                       </p>
                       <div className="flex gap-2 w-full">
                         <button
                           onClick={confirmOfferDraw}
-                          className="flex-1 py-1.5 bg-primary hover:bg-primary/80 rounded-lg text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-[0_2px_10px_rgba(59,130,246,0.2)] font-black"
+                          className="flex-1 py-1.5 bg-white hover:bg-neutral-100 rounded-lg text-[9px] font-semibold uppercase tracking-wider text-black transition-all cursor-pointer border border-white"
                         >
                           Yes
                         </button>
                         <button
                           onClick={() => setShowDrawConfirm(false)}
-                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-300 transition-all"
+                          className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[9px] font-semibold uppercase tracking-wider text-slate-300 transition-all cursor-pointer"
                         >
                           No
                         </button>
@@ -375,13 +372,13 @@ const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
 
   return (
     <div className="glass-card p-4 border-white/5 flex flex-col h-[280px]">
-      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 border-b border-white/5 pb-2 mb-3">
+      <h4 className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 border-b border-white/5 pb-2 mb-3">
         Strategic Record (SAN)
       </h4>
       <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
         <table className="w-full text-xs text-left border-collapse">
           <thead>
-            <tr className="border-b border-white/5 text-[9px] font-black uppercase text-foreground/30 tracking-wider">
+            <tr className="border-b border-white/5 text-[9px] font-semibold uppercase text-foreground/30 tracking-wider">
               <th className="py-2 w-16">Move</th>
               <th className="py-2">White</th>
               <th className="py-2">Black</th>
@@ -396,15 +393,19 @@ const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
                 <td className="py-2 font-mono text-foreground/40">
                   {pair.moveNumber}.
                 </td>
-                <td className="py-2 font-bold text-white/80">{pair.white}</td>
-                <td className="py-2 font-bold text-white/80">{pair.black}</td>
+                <td className="py-2 font-semibold text-white/80">
+                  {pair.white}
+                </td>
+                <td className="py-2 font-semibold text-white/80">
+                  {pair.black}
+                </td>
               </tr>
             ))}
             {pairs.length === 0 && (
               <tr>
                 <td
                   colSpan={3}
-                  className="py-8 text-center text-[10px] uppercase font-bold text-foreground/20 italic tracking-widest"
+                  className="py-8 text-center text-[10px] uppercase font-semibold text-foreground/20 tracking-wider"
                 >
                   No moves played yet
                 </td>

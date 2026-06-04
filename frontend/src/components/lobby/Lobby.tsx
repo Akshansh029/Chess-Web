@@ -45,24 +45,24 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
     <div className="w-full max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">
-            Available Arenas
+          <h2 className="text-3xl font-light tracking-tight text-white mb-1">
+            Available <span className="font-semibold text-primary">Arenas</span>
           </h2>
-          <p className="text-foreground/40 text-sm font-medium">
+          <p className="text-foreground/40 text-sm font-normal">
             Select a strategic confrontation to engage
           </p>
         </div>
         <div className="flex gap-4 text-white">
           <button
             onClick={fetchGames}
-            className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all active:scale-95"
+            className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
             title="Refresh List"
           >
             <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
           </button>
           <button
             onClick={onCreateGame}
-            className="bg-primary hover:bg-primary/90 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95 uppercase tracking-tighter"
+            className="bg-white hover:bg-neutral-100 text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-md transition-colors active:scale-95 text-xs uppercase tracking-wider cursor-pointer border border-white"
           >
             <Plus size={20} />
             New Arena
@@ -98,19 +98,19 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
                         ></div>
                       </div>
                       <div>
-                        <h4 className="font-black italic uppercase text-lg">
+                        <h4 className="font-semibold text-white text-base">
                           {hostName}
                         </h4>
                         <div className="flex items-center gap-1.5 opacity-40">
                           <Clock size={12} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">
+                          <span className="text-[10px] font-medium uppercase tracking-wider">
                             Waiting for rival
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="bg-white/5 px-3 py-1 rounded-lg border border-white/10">
-                      <span className="text-[10px] font-black uppercase text-foreground/40 tracking-wider">
+                      <span className="text-[10px] font-semibold uppercase text-foreground/40 tracking-wider">
                         ID: {game.id.substring(0, 5)}
                       </span>
                     </div>
@@ -118,18 +118,18 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
 
                   <div className="flex items-center justify-between relative z-10 text-white">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/30">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-foreground/30">
                         Your Alignment
                       </p>
                       <p
-                        className={`font-black uppercase tracking-tighter ${availableColor === Color.WHITE ? "text-white" : "text-slate-400"}`}
+                        className={`font-semibold uppercase tracking-wider ${availableColor === Color.WHITE ? "text-white" : "text-slate-400"}`}
                       >
                         {availableColor}
                       </p>
                     </div>
                     <button
                       onClick={() => onJoinGame(game.id, hostColor)}
-                      className="bg-white text-black hover:bg-primary hover:text-white px-5 py-3 rounded-xl font-black uppercase tracking-tighter text-sm transition-all flex items-center gap-2 group-hover:scale-105 active:scale-95 shadow-xl"
+                      className="bg-white text-black hover:bg-neutral-100 px-5 py-3 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors flex items-center gap-2 active:scale-95 shadow-md cursor-pointer border border-white"
                     >
                       <Swords size={16} />
                       Join Arena
@@ -146,12 +146,12 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-foreground/20">
                 <Play size={32} />
               </div>
-              <h3 className="text-xl font-bold uppercase italic opacity-20 tracking-tighter text-white">
+              <h3 className="text-lg font-light tracking-tight opacity-30 text-white">
                 No active matches detected
               </h3>
               <button
                 onClick={onCreateGame}
-                className="mt-4 text-primary text-sm font-bold uppercase tracking-[0.2em] hover:underline"
+                className="mt-4 text-primary text-xs font-semibold uppercase tracking-widest hover:underline cursor-pointer"
               >
                 Initiate first Arena
               </button>

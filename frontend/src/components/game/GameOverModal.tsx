@@ -51,11 +51,11 @@ export const GameOverModal = ({
         ></div>
 
         <h3
-          className={`text-4xl font-black uppercase italic tracking-tighter mb-2 ${titleColor}`}
+          className={`text-3xl font-light tracking-tight mb-2 ${titleColor}`}
         >
           {title}
         </h3>
-        <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest mb-6">
+        <p className="text-foreground/40 text-xs font-normal mb-6">
           {session.terminationReason
             ? `Decided by ${session.terminationReason.toLowerCase()}`
             : "Game completed"}
@@ -64,26 +64,26 @@ export const GameOverModal = ({
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-8 bg-white/5 border border-white/5 rounded-2xl p-6">
           <div className="space-y-1 text-left">
-            <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest block">
+            <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-wider block">
               White Player
             </span>
-            <span className="text-sm font-bold text-white block truncate">
+            <span className="text-sm font-semibold text-white block truncate">
               {session.whitePlayerName || "Unknown"}
             </span>
           </div>
           <div className="space-y-1 text-right">
-            <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest block">
+            <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-wider block">
               Black Player
             </span>
-            <span className="text-sm font-bold text-white block truncate">
+            <span className="text-sm font-semibold text-white block truncate">
               {session.blackPlayerName || "Unknown"}
             </span>
           </div>
           <div className="col-span-2 border-t border-white/5 pt-4 flex justify-between items-center text-xs">
-            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider">
+            <span className="text-[10px] font-semibold text-foreground/40 uppercase tracking-wider">
               Total Moves
             </span>
-            <span className="font-mono font-black text-white">
+            <span className="font-mono font-semibold text-white">
               {(session.moveRecordHistory || []).length} moves
             </span>
           </div>
@@ -91,7 +91,7 @@ export const GameOverModal = ({
 
         <button
           onClick={onClose}
-          className="w-full py-4 bg-white text-black hover:bg-primary hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+          className="w-full py-4 bg-white text-black hover:bg-neutral-100 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-md active:scale-95 border border-white cursor-pointer"
         >
           Return to Lobby
         </button>
