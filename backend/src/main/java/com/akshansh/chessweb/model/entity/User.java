@@ -70,5 +70,4 @@ public class User {
         this.isActive = true;
         this.createdAt = now;
     }
-
 }
