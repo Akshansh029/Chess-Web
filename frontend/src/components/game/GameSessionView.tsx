@@ -15,6 +15,9 @@ import { useGame } from "@/context/GameContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayerCard } from "./PlayerCard";
 import { GameOverModal } from "./GameOverModal";
+import { formatToIST } from "@/utils/time";
+import { MoveHistoryTable } from "./MoveHistoryTable";
+import { getCapturedPieces } from "@/utils/gameSessionUtils";
 
 interface GameSessionViewProps {
   session: GameSessionType | null;
@@ -52,6 +55,89 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
       setFen(session.currentFen);
     }
   }, [session?.currentFen, setFen]);
+
+  const prevMovesLength = React.useRef(session?.moveRecordHistory?.length || 0);
+  const prevStatus = React.useRef<GameStatus | undefined>(undefined);
+  const isFirstLoad = React.useRef(true);
+
+  const playSound = React.useCallback((soundName: string) => {
+    try {
+      const audio = new Audio(`/sounds/${soundName}.mp3`);
+      audio.play().catch((err) => {
+        console.warn(`Failed to play sound: /sounds/${soundName}.mp3`, err);
+      });
+    } catch (error) {
+      console.error("Audio playback error:", error);
+    }
+  }, []);
+
+  // Track opponent joins & game start notify sound
+  React.useEffect(() => {
+    if (!session) return;
+
+    if (session.status === GameStatus.ACTIVE) {
+      if (prevStatus.current === GameStatus.WAITING) {
+        playSound("notify");
+      } else if (prevStatus.current === undefined) {
+        const isBrandNewGame =
+          !session.moveRecordHistory || session.moveRecordHistory.length === 0;
+        if (isBrandNewGame) {
+          playSound("notify");
+        }
+      }
+    }
+
+    prevStatus.current = session.status;
+  }, [session, playSound]);
+
+  // Track game moves and play appropriate game sounds
+  React.useEffect(() => {
+    if (!session?.moveRecordHistory) return;
+
+    const currentLength = session.moveRecordHistory.length;
+
+    // No sound on initial mount or refresh
+    if (isFirstLoad.current) {
+      prevMovesLength.current = currentLength;
+      isFirstLoad.current = false;
+      return;
+    }
+
+    if (currentLength > prevMovesLength.current) {
+      const lastMove = session.moveRecordHistory[currentLength - 1];
+
+      const isCastling =
+        lastMove.isCastling ||
+        lastMove.castling ||
+        lastMove.sanNotation?.includes("O-O") ||
+        false;
+      const isCheck =
+        lastMove.isCheck ||
+        lastMove.check ||
+        lastMove.isCheckmate ||
+        lastMove.checkmate ||
+        lastMove.sanNotation?.includes("+") ||
+        lastMove.sanNotation?.includes("#") ||
+        false;
+      const isCapture =
+        lastMove.isCapture ||
+        lastMove.capture ||
+        lastMove.sanNotation?.includes("x") ||
+        false;
+
+      if (isCastling) {
+        playSound("castle");
+      } else if (isCheck) {
+        playSound("move-check");
+      } else if (isCapture) {
+        playSound("capture");
+      } else {
+        playSound("move-self");
+      }
+    }
+
+    prevMovesLength.current = currentLength;
+  }, [session?.moveRecordHistory, playSound]);
 
   const handleReturnToLobby = () => {
     setGameSession(null);
@@ -188,10 +274,10 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div className="space-y-1">
               <p className="text-[8px] font-semibold text-foreground/40 uppercase tracking-wider">
-                Active Turn
+                Started At
               </p>
               <p className="font-semibold uppercase text-white tracking-wider">
-                {session.currentTurn}
+                {formatToIST(session.startedAt)}
               </p>
             </div>
             <div className="space-y-1 text-right">
@@ -343,200 +429,6 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
       </AnimatePresence>
     </div>
   );
-};
-
-const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
-  const bottomRef = React.useRef<HTMLDivElement>(null);
-
-  // Group moves into pairs (White / Black)
-  const pairs = [];
-  for (let i = 0; i < moves.length; i += 2) {
-    const w = moves[i];
-    const b = moves[i + 1];
-    pairs.push({
-      moveNumber: Math.floor(i / 2) + 1,
-      white:
-        w?.sanNotation ||
-        `${w?.fromSquare || w?.from || ""}→${w?.toSquare || w?.to || ""}`,
-      black: b
-        ? b.sanNotation ||
-          `${b.fromSquare || b.from || ""}→${b.toSquare || b.to || ""}`
-        : "",
-    });
-  }
-
-  React.useEffect(() => {
-    // Auto-scroll to the latest move
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [moves.length]);
-
-  return (
-    <div className="glass-card p-4 border-white/5 flex flex-col h-[280px]">
-      <h4 className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 border-b border-white/5 pb-2 mb-3">
-        Strategic Record (SAN)
-      </h4>
-      <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
-        <table className="w-full text-xs text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/5 text-[9px] font-semibold uppercase text-foreground/30 tracking-wider">
-              <th className="py-2 w-16">Move</th>
-              <th className="py-2">White</th>
-              <th className="py-2">Black</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pairs.map((pair) => (
-              <tr
-                key={pair.moveNumber}
-                className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-all"
-              >
-                <td className="py-2 font-mono text-foreground/40">
-                  {pair.moveNumber}.
-                </td>
-                <td className="py-2 font-semibold text-white/80">
-                  {pair.white}
-                </td>
-                <td className="py-2 font-semibold text-white/80">
-                  {pair.black}
-                </td>
-              </tr>
-            ))}
-            {pairs.length === 0 && (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="py-8 text-center text-[10px] uppercase font-semibold text-foreground/20 tracking-wider"
-                >
-                  No moves played yet
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <div ref={bottomRef} />
-      </div>
-    </div>
-  );
-};
-
-export const pieceSymbols: Record<string, string> = {
-  p: "♟",
-  n: "♞",
-  b: "♝",
-  r: "♜",
-  q: "♛",
-  P: "♟",
-  N: "♞",
-  B: "♝",
-  R: "♜",
-  Q: "♛",
-};
-
-interface CapturedPiecesInfo {
-  whiteCaptured: string[];
-  blackCaptured: string[];
-  whiteScore: number;
-  blackScore: number;
-  whiteLead: number;
-  blackLead: number;
-}
-
-const getCapturedPieces = (fen: string): CapturedPiecesInfo => {
-  const defaultPieces = {
-    white: { P: 8, N: 2, B: 2, R: 2, Q: 1 },
-    black: { p: 8, n: 2, b: 2, r: 2, q: 1 },
-  };
-
-  const currentCounts = {
-    P: 0,
-    N: 0,
-    B: 0,
-    R: 0,
-    Q: 0,
-    p: 0,
-    n: 0,
-    b: 0,
-    r: 0,
-    q: 0,
-  };
-
-  const boardPart = fen.split(" ")[0];
-  for (const char of boardPart) {
-    if (char in currentCounts) {
-      currentCounts[char as keyof typeof currentCounts]++;
-    }
-  }
-
-  const whiteCaptured: string[] = [];
-  const blackCaptured: string[] = [];
-
-  // Pieces captured by White (Black pieces lost)
-  const pCount = defaultPieces.black.p - currentCounts.p;
-  for (let i = 0; i < pCount; i++) whiteCaptured.push("p");
-  const nCount = defaultPieces.black.n - currentCounts.n;
-  for (let i = 0; i < nCount; i++) whiteCaptured.push("n");
-  const bCount = defaultPieces.black.b - currentCounts.b;
-  for (let i = 0; i < bCount; i++) whiteCaptured.push("b");
-  const rCount = defaultPieces.black.r - currentCounts.r;
-  for (let i = 0; i < rCount; i++) whiteCaptured.push("r");
-  const qCount = defaultPieces.black.q - currentCounts.q;
-  for (let i = 0; i < qCount; i++) whiteCaptured.push("q");
-
-  // Pieces captured by Black (White pieces lost)
-  const PCount = defaultPieces.white.P - currentCounts.P;
-  for (let i = 0; i < PCount; i++) blackCaptured.push("P");
-  const NCount = defaultPieces.white.N - currentCounts.N;
-  for (let i = 0; i < NCount; i++) blackCaptured.push("N");
-  const BCount = defaultPieces.white.B - currentCounts.B;
-  for (let i = 0; i < BCount; i++) blackCaptured.push("B");
-  const RCount = defaultPieces.white.R - currentCounts.R;
-  for (let i = 0; i < RCount; i++) blackCaptured.push("R");
-  const QCount = defaultPieces.white.Q - currentCounts.Q;
-  for (let i = 0; i < QCount; i++) blackCaptured.push("Q");
-
-  const values: Record<string, number> = {
-    P: 1,
-    N: 3,
-    B: 3,
-    R: 5,
-    Q: 9,
-    p: 1,
-    n: 3,
-    b: 3,
-    r: 5,
-    q: 9,
-  };
-
-  const sortOrder: Record<string, number> = {
-    q: 0,
-    r: 1,
-    b: 2,
-    n: 3,
-    p: 4,
-    Q: 0,
-    R: 1,
-    B: 2,
-    N: 3,
-    P: 4,
-  };
-
-  whiteCaptured.sort((a, b) => sortOrder[a] - sortOrder[b]);
-  blackCaptured.sort((a, b) => sortOrder[a] - sortOrder[b]);
-
-  const whiteScore = whiteCaptured.reduce((sum, p) => sum + values[p], 0);
-  const blackScore = blackCaptured.reduce((sum, p) => sum + values[p], 0);
-
-  const whiteLead = Math.max(0, whiteScore - blackScore);
-  const blackLead = Math.max(0, blackScore - whiteScore);
-
-  return {
-    whiteCaptured,
-    blackCaptured,
-    whiteScore,
-    blackScore,
-    whiteLead,
-    blackLead,
-  };
 };
 
 export default GameSessionView;

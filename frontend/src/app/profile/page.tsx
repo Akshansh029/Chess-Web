@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { formatToIST } from "@/utils/time";
 
 export default function ProfilePage() {
   const { accessToken, isAuthenticated, isLoading } = useAuth();
@@ -95,24 +96,6 @@ export default function ProfilePage() {
       setTimeout(() => setCopiedGameId(null), 2000);
     } catch (err) {
       toast.error("Failed to copy PGN.");
-    }
-  };
-
-  const formatToIST = (utcString: string | undefined) => {
-    if (!utcString) return "N/A";
-    try {
-      const date = new Date(utcString);
-      if (isNaN(date.getTime())) {
-        return utcString;
-      }
-      return date.toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata",
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return utcString;
     }
   };
 

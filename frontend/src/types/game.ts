@@ -41,6 +41,14 @@ export interface Move {
   sanNotation?: string;
   fromSquare?: string;
   toSquare?: string;
+  isCapture?: boolean;
+  capture?: boolean;
+  isCheck?: boolean;
+  check?: boolean;
+  isCheckmate?: boolean;
+  checkmate?: boolean;
+  isCastling?: boolean;
+  castling?: boolean;
 }
 
 export interface GameSession {
