@@ -127,6 +127,11 @@ public class GameController {
             );
         }
 
+        // save the game session
+        gamePersistenceService.persist(session);
+
+        gameStore.remove(session.getId().toString());
+
         messagingTemplate.convertAndSend(
                 "/topic/game." + session.getId(),
                 session
@@ -163,6 +168,11 @@ public class GameController {
         session.setResult(GameResult.DRAW);
         session.setTerminationReason(GameTerminationReason.DRAW_ACCEPTED);
         session.setDrawOfferBy(null);
+
+        // save the game session
+        gamePersistenceService.persist(session);
+
+        gameStore.remove(session.getId().toString());
 
         messagingTemplate.convertAndSend("/topic/game." + request.getGameId(), session);
     }

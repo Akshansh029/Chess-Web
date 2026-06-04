@@ -1,5 +1,6 @@
 package com.akshansh.chessweb.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.PieceType;
 import jakarta.persistence.*;
@@ -25,6 +26,7 @@ public class MoveRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
+    @JsonIgnore
     private Game gameId;
 
     @Column(name = "move_number", nullable = false)

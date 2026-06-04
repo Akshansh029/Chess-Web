@@ -3,6 +3,7 @@ package com.akshansh.chessweb.model.entity;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import com.akshansh.chessweb.model.enums.GameTerminationReason;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -30,10 +31,12 @@ public class Game {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "white_player_id", nullable = false)
+    @JsonIgnore
     private User whitePlayer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "black_player_id")
+    @JsonIgnore
     private User blackPlayer;
 
     @NotNull

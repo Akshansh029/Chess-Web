@@ -58,6 +58,9 @@ public class GamePersistenceService {
 
         // save the game
         gameRepo.save(game);
+
+        // save moves
+        moveRepo.saveAll(session.getMoveRecordHistory());
     }
 
     private String buildPgn(List<MoveRecord> moves) {

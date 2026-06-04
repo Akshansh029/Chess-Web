@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -312,6 +313,25 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         log.warn("Client error event=illegalState status=400 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                MDC.get("userId"),
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                MDC.get("requestId")
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Credentials",
+                "Invalid username or password",
+                request.getRequestURI()
+        );
+        log.warn("Client error event=badCredentials status=400 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 MDC.get("userId"),
