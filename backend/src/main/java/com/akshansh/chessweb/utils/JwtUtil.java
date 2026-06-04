@@ -42,25 +42,10 @@ public class JwtUtil {
         return Jwts.builder()
                 .issuer(jwtIssuer)
                 .subject(principal.getUserId().toString())
-                .claim("userName", principal.getName())
-                .claim("email", principal.getUsername())
-                .claim("role", principal.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList()
-                )
+                .claim("userName", principal.getUsername())
+                .claim("email", principal.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRY_MS))
-                .signWith(getSecretKey())
-                .compact();
-    }
-
-    public String generateRefreshToken(UserPrincipal principal){
-        return Jwts.builder()
-                .issuer(jwtIssuer)
-                .subject(principal.getUserId().toString())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRY_MS))
                 .signWith(getSecretKey())
                 .compact();
     }
@@ -68,16 +53,6 @@ public class JwtUtil {
     public String extractEmail(String token){
         return Jwts.parser().verifyWith(getSecretKey()).build()
                 .parseSignedClaims(token).getPayload().get("email").toString();
-    }
-
-    public UUID generateUserIdFromToken(String token) {
-        Claims claim = Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        return UUID.fromString(claim.getSubject());
     }
 
     public boolean isTokenValid(String token){

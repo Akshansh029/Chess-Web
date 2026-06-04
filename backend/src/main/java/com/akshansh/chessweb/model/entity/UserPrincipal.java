@@ -14,10 +14,6 @@ public class UserPrincipal implements UserDetails {
 
     private final User user;
 
-    public String getName(){
-        return user.getUsername();
-    }
-
     public UUID getUserId(){
         return user.getId();
     }
@@ -34,6 +30,10 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
+        return user.getUsername();
+    }
+
+    public String getEmail() {
         return user.getEmail();
     }
 

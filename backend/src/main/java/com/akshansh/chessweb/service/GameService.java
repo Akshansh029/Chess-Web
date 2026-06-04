@@ -4,6 +4,7 @@ import com.akshansh.chessweb.exception.ResourceNotFoundException;
 import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.CreateGameReqDto;
 import com.akshansh.chessweb.model.dto.JoinGameReqDto;
+import com.akshansh.chessweb.model.entity.UserPrincipal;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
+import static com.akshansh.chessweb.utils.UserUtil.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +27,14 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public UUID createGame(CreateGameReqDto request){
+        UserPrincipal currentUser = getCurrentUser();
+
         GameSession newSession = GameSession.builder()
                 .id(UUID.randomUUID())
-                .whitePlayerId(request.getPlayerColor().equals(Color.WHITE) ? request.getPlayerId() : null)
-                .blackPlayerId(request.getPlayerColor().equals(Color.BLACK) ? request.getPlayerId() : null)
-                .whitePlayerName(request.getPlayerColor().equals(Color.WHITE) ? request.getPlayerName() : null)
-                .blackPlayerName(request.getPlayerColor().equals(Color.BLACK) ? request.getPlayerName() : null)
+                .whitePlayerId(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUserId() : null)
+                .blackPlayerId(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUserId() : null)
+                .whitePlayerName(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUsername() : null)
+                .blackPlayerName(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUsername() : null)
                 .moveRecordHistory(new ArrayList<>())
                 .currentTurn(Color.WHITE)
                 .currentFen(STARTING_FEN)
@@ -43,8 +47,14 @@ public class GameService {
     }
 
     public GameSession joinGame(JoinGameReqDto request){
+        UserPrincipal currentUser = getCurrentUser();
+
         GameSession session = store.findById(request.getGameId())
                 .orElseThrow(() -> new ResourceNotFoundException("Game session not found"));
+
+        if(currentUser.getUserId().equals(session.getBlackPlayerId()) || currentUser.getUserId().equals(session.getWhitePlayerId())){
+                throw new IllegalArgumentException("Player cannot join game with himself");
+        }
 
         if(request.getPlayerColor().equals(Color.BLACK)){
             session.setBlackPlayerId(request.getPlayerId());

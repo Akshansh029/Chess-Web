@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -190,15 +193,17 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-
-        String refreshToken = Arrays.stream(request.getCookies()) //getCookies() method returns a array of cookie
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(()-> new AuthenticationServiceException("RefreshToken not found"));
-
-        // delete refreshToken from DB
-        authService.logout(refreshToken);
+        try {
+            if (request.getCookies() != null) {
+                Arrays.stream(request.getCookies())
+                        .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .ifPresent(authService::logout);
+            }
+        } catch (Exception e) {
+            log.error("event=couldNotClearCookies userId={} requestId={}", MDC.get("userId"), MDC.get("requestId"));
+        }
 
         // Clear refreshToken and accessToken from browser cookies
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")

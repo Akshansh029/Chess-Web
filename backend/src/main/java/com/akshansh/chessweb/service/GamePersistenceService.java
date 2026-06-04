@@ -1,5 +1,6 @@
 package com.akshansh.chessweb.service;
 
+import com.akshansh.chessweb.exception.ResourceNotFoundException;
 import com.akshansh.chessweb.model.entity.Game;
 import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.entity.MoveRecord;
@@ -29,10 +30,12 @@ public class GamePersistenceService {
     @Transactional
     public void persist(GameSession session){
 
-        User whitePlayer = findOrCreateGuestUser(session.getWhitePlayerId(), session.getWhitePlayerName());
+        User whitePlayer = userRepo.findById(session.getWhitePlayerId())
+                .orElseThrow(() -> new ResourceNotFoundException("White player user not found"));
         User blackPlayer = session.getBlackPlayerId() == null
                 ? null
-                : findOrCreateGuestUser(session.getBlackPlayerId(), session.getBlackPlayerName());
+                : userRepo.findById(session.getBlackPlayerId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Black player user not found"));
 
         Game game = Game.builder()
                 .id(session.getId())
@@ -55,40 +58,6 @@ public class GamePersistenceService {
 
         // save the game
         gameRepo.save(game);
-    }
-
-    private User findOrCreateGuestUser(UUID playerId, String playerName) {
-        return userRepo.findById(playerId)
-                .orElseGet(() -> {
-                    String guestEmail = "guest_" + compactId(playerId) + "@local.test";
-                    return userRepo.findByEmail(guestEmail)
-                            .orElseGet(() -> userRepo.save(User.builder()
-                        .username(buildGuestUsername(playerId, playerName))
-                        .email(guestEmail)
-                        .passwordHash("GUEST_USER_NO_PASSWORD")
-                        .eloRating(800)
-                        .createdAt(Instant.now())
-                        .isActive(true)
-                        .build()));
-                });
-    }
-
-    private String buildGuestUsername(UUID playerId, String playerName) {
-        String suffix = compactId(playerId).substring(0, 12);
-        String baseName = playerName == null || playerName.isBlank()
-                ? "guest"
-                : playerName.replaceAll("[^a-zA-Z0-9_]", "_");
-        if (baseName.length() > 30) {
-            baseName = baseName.substring(0, 30);
-        }
-        if (baseName.length() < 3) {
-            baseName = "guest";
-        }
-        return baseName + "_" + suffix;
-    }
-
-    private String compactId(UUID id) {
-        return id.toString().replace("-", "");
     }
 
     private String buildPgn(List<MoveRecord> moves) {

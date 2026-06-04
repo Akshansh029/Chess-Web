@@ -58,7 +58,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)      // CSRF token disabled
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                                 .requestMatchers("/api/auth/**").permitAll()     // leave auth requests open
                                 .requestMatchers("/ws/**").permitAll()       // permit websocket handshake
                                 .requestMatchers("/swagger-ui/**").permitAll()
