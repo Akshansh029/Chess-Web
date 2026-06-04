@@ -2,12 +2,14 @@
 
 import React, { useEffect } from "react";
 import { useGame } from "@/context/GameContext";
+import { useAuth } from "@/context/AuthContext";
 import { useParams, useRouter } from "next/navigation";
 import GameSessionView from "@/components/game/GameSessionView";
 import { GameShell } from "@/components/layout/GameShell";
 
 export default function GamePage() {
   const { id } = useParams() as { id: string };
+  const { isAuthenticated } = useAuth();
   const {
     playerName,
     playerColor,
@@ -20,7 +22,7 @@ export default function GamePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!playerName) {
+    if (!isAuthenticated) {
       router.replace("/");
       return;
     }
@@ -37,14 +39,14 @@ export default function GamePage() {
   }, [
     id,
     connected,
-    playerName,
+    isAuthenticated,
     connect,
     subscribeToGame,
     unsubscribeFromGame,
     router,
   ]);
 
-  if (!playerName) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <GameShell>

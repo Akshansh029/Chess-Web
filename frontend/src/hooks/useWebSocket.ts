@@ -39,9 +39,9 @@ export const useWebSocket = () => {
         onDisconnect: () => {
           setConnected(false);
         },
-        debug: (str) => {
-          console.log(str);
-        },
+        // debug: (str) => {
+        //   console.log(str);
+        // },
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
@@ -95,8 +95,13 @@ export const useWebSocket = () => {
     (
       gameId: string,
       playerId: string,
-      move: { from: string; to: string; piece: string; promotionPiece?: string },
-      color: Color
+      move: {
+        from: string;
+        to: string;
+        piece: string;
+        promotionPiece?: string;
+      },
+      color: Color,
     ) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
@@ -110,7 +115,7 @@ export const useWebSocket = () => {
         });
       }
     },
-    []
+    [],
   );
 
   const disconnect = useCallback(() => {
@@ -151,7 +156,7 @@ export const useWebSocket = () => {
         });
       }
     },
-    []
+    [],
   );
 
   const sendDrawOffer = useCallback(
@@ -160,7 +165,7 @@ export const useWebSocket = () => {
       playerId: string,
       playerName: string,
       opponentId: string,
-      opponentName: string
+      opponentName: string,
     ) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
@@ -175,11 +180,15 @@ export const useWebSocket = () => {
         });
       }
     },
-    []
+    [],
   );
 
   const sendDrawAccept = useCallback(
-    (gameId: string, offerAccepterByPlayerId: string, offerAcceptedByPlayerName: string) => {
+    (
+      gameId: string,
+      offerAccepterByPlayerId: string,
+      offerAcceptedByPlayerName: string,
+    ) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
           destination: "/app/game.draw.accept",
@@ -191,11 +200,15 @@ export const useWebSocket = () => {
         });
       }
     },
-    []
+    [],
   );
 
   const sendDrawDecline = useCallback(
-    (gameId: string, offerAccepterByPlayerId: string, offerAcceptedByPlayerName: string) => {
+    (
+      gameId: string,
+      offerAccepterByPlayerId: string,
+      offerAcceptedByPlayerName: string,
+    ) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
           destination: "/app/game.draw.decline",
@@ -207,7 +220,7 @@ export const useWebSocket = () => {
         });
       }
     },
-    []
+    [],
   );
 
   return {

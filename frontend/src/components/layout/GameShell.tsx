@@ -11,10 +11,10 @@ interface GameShellProps {
 }
 
 export const GameShell: React.FC<GameShellProps> = ({ children }) => {
-  const { connected, playerName } = useGame();
+  const { connected } = useGame();
   const { user, logout, isAuthenticated } = useAuth();
 
-  const displayName = user ? user.name : playerName;
+  const displayName = isAuthenticated && user ? user.name : null;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col font-sans selection:bg-primary selection:text-white">
@@ -32,7 +32,10 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
       <header className="relative z-50 border-b border-white/5 bg-black/20 backdrop-blur-md">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-4 hover:opacity-90 transition-opacity">
+            <Link
+              href="/"
+              className="flex items-center gap-4 hover:opacity-90 transition-opacity"
+            >
               <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
                 <Trophy className="text-primary w-5 h-5 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
               </div>
@@ -58,13 +61,13 @@ export const GameShell: React.FC<GameShellProps> = ({ children }) => {
                 </span>
               </div>
             )}
-            
+
             {displayName && (
               <div className="flex items-center gap-4">
                 <div className="hidden md:flex items-center gap-3">
                   <div className="text-right">
                     <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.2em]">
-                      {isAuthenticated ? "Grandmaster" : "Guest Strategist"}
+                      {isAuthenticated ? "Player" : "Guest"}
                     </p>
                     <p className="text-xs font-black uppercase text-white tracking-widest">
                       {displayName}

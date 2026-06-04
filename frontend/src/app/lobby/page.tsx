@@ -4,12 +4,14 @@ import React, { useEffect } from "react";
 import Lobby from "@/components/lobby/Lobby";
 import { useGame } from "@/context/GameContext";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 import { gameApi } from "@/services/api";
 import { Color } from "@/types/game";
 import { useRouter } from "next/navigation";
 import { GameShell } from "@/components/layout/GameShell";
 
 export default function LobbyPage() {
+  const { isAuthenticated } = useAuth();
   const {
     playerName,
     playerId,
@@ -23,14 +25,14 @@ export default function LobbyPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!playerName) {
+    if (!isAuthenticated) {
       router.replace("/");
       return;
     }
     if (!connected) {
       connect();
     }
-  }, [playerName, connected, connect, router]);
+  }, [isAuthenticated, connected, connect, router]);
 
   const handleCreateGame = async () => {
     try {
@@ -67,7 +69,7 @@ export default function LobbyPage() {
     }
   };
 
-  if (!playerName) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <GameShell>

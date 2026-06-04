@@ -115,8 +115,6 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     );
   }
 
-  console.log(session);
-
   const isWaiting = session.status === GameStatus.WAITING;
   const isGameActive = session.status === GameStatus.ACTIVE;
   const opponentName =
@@ -360,9 +358,12 @@ const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
     const b = moves[i + 1];
     pairs.push({
       moveNumber: Math.floor(i / 2) + 1,
-      white: w?.sanNotation || `${w?.fromSquare || w?.from || ""}→${w?.toSquare || w?.to || ""}`,
+      white:
+        w?.sanNotation ||
+        `${w?.fromSquare || w?.from || ""}→${w?.toSquare || w?.to || ""}`,
       black: b
-        ? b.sanNotation || `${b.fromSquare || b.from || ""}→${b.toSquare || b.to || ""}`
+        ? b.sanNotation ||
+          `${b.fromSquare || b.from || ""}→${b.toSquare || b.to || ""}`
         : "",
     });
   }

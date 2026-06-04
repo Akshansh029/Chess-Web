@@ -11,6 +11,7 @@ interface GameContextType {
   playerColor: Color;
   setPlayerColor: (color: Color) => void;
   playerId: string;
+  setPlayerId: (id: string) => void;
   connected: boolean;
   connect: () => void;
   disconnect: () => void;
@@ -22,7 +23,7 @@ interface GameContextType {
     gameId: string,
     playerId: string,
     move: { from: string; to: string; piece: string; promotionPiece?: string },
-    color: Color
+    color: Color,
   ) => void;
   sendResign: (gameId: string, playerId: string, playerName: string) => void;
   sendDrawOffer: (
@@ -30,17 +31,17 @@ interface GameContextType {
     playerId: string,
     playerName: string,
     opponentId: string,
-    opponentName: string
+    opponentName: string,
   ) => void;
   sendDrawAccept: (
     gameId: string,
     offerAccepterByPlayerId: string,
-    offerAcceptedByPlayerName: string
+    offerAcceptedByPlayerName: string,
   ) => void;
   sendDrawDecline: (
     gameId: string,
     offerAccepterByPlayerId: string,
-    offerAcceptedByPlayerName: string
+    offerAcceptedByPlayerName: string,
   ) => void;
 }
 
@@ -56,20 +57,27 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
     return "";
   });
   const [playerColor, setPlayerColor] = useState<Color>(Color.WHITE);
-  const [playerId] = useState(() => {
+  const [playerId, setPlayerIdState] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("chess_player_id");
-      if (saved) return saved;
-      const newId = uuidv4();
-      localStorage.setItem("chess_player_id", newId);
-      return newId;
+      return localStorage.getItem("chess_player_id") || "";
     }
-    return uuidv4();
+    return "";
   });
 
   const setPlayerName = (name: string) => {
     setPlayerNameState(name);
     localStorage.setItem("chess_player_name", name);
+  };
+
+  const setPlayerId = (id: string) => {
+    setPlayerIdState(id);
+    if (typeof window !== "undefined") {
+      if (id) {
+        localStorage.setItem("chess_player_id", id);
+      } else {
+        localStorage.removeItem("chess_player_id");
+      }
+    }
   };
 
   const ws = useWebSocket();
@@ -82,6 +90,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
         playerColor,
         setPlayerColor,
         playerId,
+        setPlayerId,
         connected: ws.connected,
         connect: ws.connect,
         disconnect: ws.disconnect,

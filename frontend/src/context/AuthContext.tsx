@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { authApi, RegisterRequest } from "@/services/auth";
 import { useGame } from "@/context/GameContext";
 
@@ -32,7 +38,7 @@ function parseJwt(token: string) {
         .atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
@@ -40,8 +46,10 @@ function parseJwt(token: string) {
   }
 }
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { setPlayerName } = useGame();
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const { setPlayerName, setPlayerId } = useGame();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -57,6 +65,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
       setUser(profile);
       setPlayerName(profile.name); // synchronize with GameContext
+      setPlayerId(profile.id); // synchronize with GameContext
     }
   };
 
@@ -88,24 +97,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const expiryTimeMs = decoded.exp * 1000;
     const delay = expiryTimeMs - Date.now() - 60 * 1000; // 1 min before expiry
 
-    const refreshTimer = setTimeout(async () => {
-      try {
-        console.log("Initiating silent token refresh...");
-        const response = await authApi.refresh();
-        if (response.accessToken) {
-          handleAuthSuccess(response.accessToken);
+    const refreshTimer = setTimeout(
+      async () => {
+        try {
+          console.log("Initiating silent token refresh...");
+          const response = await authApi.refresh();
+          if (response.accessToken) {
+            handleAuthSuccess(response.accessToken);
+          }
+        } catch (err) {
+          console.error("Automatic token refresh failed:", err);
+          // Clean up user session
+          setUser(null);
+          setAccessToken(null);
+          setPlayerName("");
+          setPlayerId("");
         }
-      } catch (err) {
-        console.error("Automatic token refresh failed:", err);
-        // Clean up user session
-        setUser(null);
-        setAccessToken(null);
-        setPlayerName("");
-      }
-    }, Math.max(0, delay));
+      },
+      Math.max(0, delay),
+    );
 
     return () => clearTimeout(refreshTimer);
-  }, [accessToken, setPlayerName]);
+  }, [accessToken, setPlayerName, setPlayerId]);
 
   const login = async (email: string, password?: string) => {
     setIsLoading(true);
@@ -149,6 +162,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       setAccessToken(null);
       setPlayerName(""); // clear from GameContext
+      setPlayerId(""); // clear from GameContext
       setIsLoading(false);
     }
   };
