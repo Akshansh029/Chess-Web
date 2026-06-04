@@ -73,21 +73,24 @@ export const GameShell: React.FC<GameShellProps> = ({ children, showNavbar = tru
 
               {displayName && (
                 <div className="flex items-center gap-4">
-                  <div className="hidden md:flex items-center gap-3">
+                  <Link
+                    href="/profile"
+                    className="hidden md:flex items-center gap-3 hover:opacity-90 group cursor-pointer"
+                  >
                     <div className="text-right">
-                      <p className="text-[10px] font-medium text-foreground/30 uppercase tracking-wider">
+                      <p className="text-[10px] font-medium text-foreground/30 uppercase tracking-wider group-hover:text-primary transition-colors">
                         {isAuthenticated ? "Player" : "Guest"}
                       </p>
-                      <p className="text-xs font-semibold uppercase text-white tracking-wider">
+                      <p className="text-xs font-semibold uppercase text-white tracking-wider group-hover:text-primary transition-colors">
                         {displayName}
                       </p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 group-hover:border-primary/40 flex items-center justify-center transition-all">
                       <span className="text-xs font-semibold text-primary uppercase">
                         {displayName.substring(0, 2)}
                       </span>
                     </div>
-                  </div>
+                  </Link>
 
                   {isAuthenticated && (
                     <button
