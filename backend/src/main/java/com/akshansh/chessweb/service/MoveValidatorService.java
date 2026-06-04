@@ -56,6 +56,9 @@ public class MoveValidatorService {
             return invalid("ILLEGAL_MOVE");
         }
 
+        boolean capture = isCapture(board, move);
+        boolean enPassant = isEnPassant(board, move);
+
         board.doMove(move);
 
         return MoveResult.builder()
@@ -63,14 +66,14 @@ public class MoveValidatorService {
                 .newFen(board.getFen())
                 .san(buildSan(session.getCurrentFen(), move))
                 .pieceMoved(dto.getTo())
-                .capture(isCapture(board, move) || isEnPassant(board, move))
+                .capture(capture || enPassant)
                 .check(board.isKingAttacked())
                 .checkmate(board.isMated())
                 .stalemate(board.isStaleMate())
                 .insufficientMaterial(board.isInsufficientMaterial())
                 .repetition(board.isRepetition())
                 .castling(isCastling(dto))
-                .enPassant(isEnPassant(board, move))
+                .enPassant(enPassant)
                 .promotion(dto.getPromotionPiece() != null)
                 .build();
     }
