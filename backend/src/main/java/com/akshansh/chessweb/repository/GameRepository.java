@@ -21,6 +21,7 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
         ) FROM Game g
         WHERE g.blackPlayer.id = :userId
         OR g.whitePlayer.id = :userId
+        ORDER BY g.endedAt DESC
     """)
     Page<GameDto> getGamesByWhitePlayerOrBlackPlayer(
             Pageable pageable,

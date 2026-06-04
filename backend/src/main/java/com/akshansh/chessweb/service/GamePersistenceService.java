@@ -11,7 +11,6 @@ import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.repository.GameRepository;
 import com.akshansh.chessweb.repository.MoveRepository;
 import com.akshansh.chessweb.repository.UserRepository;
-import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +46,9 @@ public class GamePersistenceService {
 
     @Transactional
     public void persist(GameSession session){
+        List<MoveRecord> moves = session.getMoveRecordHistory() == null
+                ? Collections.emptyList()
+                : session.getMoveRecordHistory();
 
         User whitePlayer = userRepo.findById(session.getWhitePlayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("White player user not found"));
@@ -63,21 +66,19 @@ public class GamePersistenceService {
                 .terminationReason(session.getTerminationReason())
                 .pgn(buildPgn(session))
                 .finalFen(session.getCurrentFen())
-                .totalMoves(session.getMoveRecordHistory().size())
+                .totalMoves(moves.size())
                 .startedAt(session.getStartedAt())
                 .endedAt(Instant.now())
-                .moveRecordList(session.getMoveRecordHistory())
                 .build();
-
-        if (session.getMoveRecordHistory() != null) {
-            session.getMoveRecordHistory().forEach(move -> move.setGameId(game));
-        }
 
         // save the game
         gameRepo.save(game);
 
         // save moves
-        moveRepo.saveAll(session.getMoveRecordHistory());
+        moveRepo.saveAll(moves.stream()
+                .filter(Objects::nonNull)
+                .map(move -> copyMoveRecordForPersistence(move, game))
+                .toList());
         log.info("event=gameSaved userId={} gameId={}", MDC.get("userId"), game.getId());
     }
 
@@ -94,6 +95,25 @@ public class GamePersistenceService {
                 pageNo, pageSize, result.getTotalElements(), result.getTotalPages()
         );
         return result;
+    }
+
+    private MoveRecord copyMoveRecordForPersistence(MoveRecord move, Game game) {
+        return MoveRecord.builder()
+                .gameId(game)
+                .moveNumber(move.getMoveNumber())
+                .color(move.getColor())
+                .fromSquare(move.getFromSquare())
+                .toSquare(move.getToSquare())
+                .piece(move.getPiece())
+                .promotionPiece(move.getPromotionPiece())
+                .isCapture(move.isCapture())
+                .isCheck(move.isCheck())
+                .isCheckmate(move.isCheckmate())
+                .isCastling(move.isCastling())
+                .sanNotation(move.getSanNotation())
+                .fenAfter(move.getFenAfter())
+                .playedAt(move.getPlayedAt())
+                .build();
     }
 
     private String buildPgn(GameSession session) {
