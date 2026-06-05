@@ -50,9 +50,7 @@ export const GameOverModal = ({
           className={`absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full blur-[80px] pointer-events-none opacity-40 ${isWinner ? "bg-amber-500" : isLoser ? "bg-red-500" : "bg-blue-500"}`}
         ></div>
 
-        <h3
-          className={`text-3xl font-light tracking-tight mb-2 ${titleColor}`}
-        >
+        <h3 className={`text-3xl font-light tracking-tight mb-2 ${titleColor}`}>
           {title}
         </h3>
         <p className="text-foreground/40 text-xs font-normal mb-6">

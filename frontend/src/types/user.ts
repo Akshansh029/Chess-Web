@@ -7,6 +7,11 @@ export interface UserProfileDto {
   eloRating: number;
   isActive: boolean;
   createdAt: string; // ISO timestamp (UTC)
+  gamesPlayed: number;
+  gamesWon: number;
+  gamesLost: number;
+  gamesDraw: number;
+  winPercentage: number;
 }
 
 export interface GameHistoryDto {

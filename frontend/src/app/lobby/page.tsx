@@ -65,7 +65,10 @@ export default function LobbyPage() {
       router.push(`/game/${gameId}`);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to join arena. It may have been filled or closed.");
+      toast.error(
+        err.message ||
+          "Failed to join arena. It may have been filled or closed.",
+      );
     }
   };
 
