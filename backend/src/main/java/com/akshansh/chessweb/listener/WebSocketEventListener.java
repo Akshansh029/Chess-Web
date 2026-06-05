@@ -21,7 +21,6 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         log.info("Received a new web socket connection");
-
     }
 
     @EventListener
@@ -31,13 +30,6 @@ public class WebSocketEventListener {
 
         if (username != null) {
             log.info("user disconnected: {}", username);
-
-            var chatMessage = ChatMessage.builder()
-                    .type(MessageType.LEAVE)
-                    .sender(username)
-                    .build();
-
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }
     }
 }
