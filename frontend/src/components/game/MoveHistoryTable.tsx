@@ -3,7 +3,13 @@
 import { Move } from "@/types/game";
 import React from "react";
 
-export const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
+export const MoveHistoryTable = ({
+  moves,
+  noBorder = false,
+}: {
+  moves: Move[];
+  noBorder?: boolean;
+}) => {
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   // Group moves into pairs (White / Black)
@@ -29,7 +35,13 @@ export const MoveHistoryTable = ({ moves }: { moves: Move[] }) => {
   }, [moves.length]);
 
   return (
-    <div className="glass-card p-4 border-white/5 flex flex-col h-[280px]">
+    <div
+      className={
+        noBorder
+          ? "p-4 flex flex-col h-full min-h-0"
+          : "glass-card p-4 border-white/5 flex flex-col h-[280px]"
+      }
+    >
       <h4 className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 border-b border-white/5 pb-2 mb-3">
         Strategic Record (SAN)
       </h4>

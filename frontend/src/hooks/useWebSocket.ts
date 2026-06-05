@@ -91,6 +91,18 @@ export const useWebSocket = () => {
     }
   }, []);
 
+  const sendJoin = useCallback((username: string) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: "/app/addUser",
+        body: JSON.stringify({
+          sender: username,
+          type: MessageType.JOIN,
+        }),
+      });
+    }
+  }, []);
+
   const sendMove = useCallback(
     (
       gameId: string,
@@ -231,6 +243,7 @@ export const useWebSocket = () => {
     connect,
     disconnect,
     sendMessage,
+    sendJoin,
     sendMove,
     sendResign,
     sendDrawOffer,

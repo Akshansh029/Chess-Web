@@ -1,7 +1,7 @@
 "use client";
 import { Color } from "@/types/game";
 import { Target, User } from "lucide-react";
-import { pieceSymbols } from "./GameSessionView";
+import { pieceSymbols } from "@/utils/gameSessionUtils";
 
 export const PlayerCard = ({
   name,

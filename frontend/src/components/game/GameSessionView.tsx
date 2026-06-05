@@ -5,7 +5,7 @@ import {
   GameSession as GameSessionType,
   Color,
   GameStatus,
-  Move,
+  MessageType,
 } from "@/types/game";
 import { Activity, Flag, Handshake } from "lucide-react";
 import { useChessStore } from "@/services/chessStore";
@@ -18,6 +18,7 @@ import { GameOverModal } from "./GameOverModal";
 import { formatToIST } from "@/utils/time";
 import { MoveHistoryTable } from "./MoveHistoryTable";
 import { getCapturedPieces } from "@/utils/gameSessionUtils";
+import { GameChat } from "./GameChat";
 
 interface GameSessionViewProps {
   session: GameSessionType | null;
@@ -39,8 +40,12 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     sendDrawOffer,
     sendDrawAccept,
     sendDrawDecline,
+    messages,
+    playerName,
   } = useGame();
   const [showGameOverModal, setShowGameOverModal] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<"moves" | "chat">("moves");
+  const [hasUnreadChat, setHasUnreadChat] = React.useState(false);
 
   React.useEffect(() => {
     if (session?.status === GameStatus.ENDED) {
@@ -138,6 +143,25 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
     prevMovesLength.current = currentLength;
   }, [session?.moveRecordHistory, playSound]);
+
+  const prevMessagesLength = React.useRef(messages.length);
+
+  React.useEffect(() => {
+    if (activeTab === "chat") {
+      setHasUnreadChat(false);
+    } else {
+      if (messages.length > prevMessagesLength.current) {
+        const newMessages = messages.slice(prevMessagesLength.current);
+        const hasIncomingChatFromOther = newMessages.some(
+          (msg) => msg.sender !== playerName && msg.type === MessageType.CHAT,
+        );
+        if (hasIncomingChatFromOther) {
+          setHasUnreadChat(true);
+        }
+      }
+    }
+    prevMessagesLength.current = messages.length;
+  }, [messages, activeTab, playerName]);
 
   const handleReturnToLobby = () => {
     setGameSession(null);
@@ -256,7 +280,51 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
       {/* Right Column (Moves Record & Commands) */}
       <div className="lg:col-span-3 space-y-6">
-        <MoveHistoryTable moves={session.moveRecordHistory || []} />
+        <div className="glass-card border-white/5 flex flex-col h-[340px] overflow-hidden shadow-lg">
+          {/* Tab Headers */}
+          <div className="flex border-b border-white/5 bg-white/1 text-[10px] font-semibold uppercase tracking-wider select-none">
+            <button
+              onClick={() => setActiveTab("moves")}
+              className={`flex-1 py-3 text-center border-b transition-all cursor-pointer ${
+                activeTab === "moves"
+                  ? "border-primary text-white bg-white/2"
+                  : "border-transparent text-foreground/40 hover:text-white"
+              }`}
+            >
+              Record
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("chat");
+                setHasUnreadChat(false);
+              }}
+              className={`flex-1 py-3 text-center border-b transition-all cursor-pointer relative ${
+                activeTab === "chat"
+                  ? "border-primary text-white bg-white/2"
+                  : "border-transparent text-foreground/40 hover:text-white"
+              }`}
+            >
+              <span className="relative inline-flex items-center gap-1.5 justify-center">
+                Chat
+                {hasUnreadChat && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-sm shadow-rose-500/50" />
+                )}
+              </span>
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 min-h-0">
+            {activeTab === "moves" ? (
+              <MoveHistoryTable
+                moves={session.moveRecordHistory || []}
+                noBorder={true}
+              />
+            ) : (
+              <GameChat />
+            )}
+          </div>
+        </div>
 
         <div className="glass-card p-6 border-white/5 space-y-6">
           <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">

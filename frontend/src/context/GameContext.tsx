@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Color, GameSession } from "@/types/game";
+import { Color, GameSession, ChatMessage } from "@/types/game";
 import { v4 as uuidv4 } from "uuid";
 import { useWebSocket } from "@/hooks/useWebSocket";
 
@@ -43,6 +43,9 @@ interface GameContextType {
     offerAccepterByPlayerId: string,
     offerAcceptedByPlayerName: string,
   ) => void;
+  messages: ChatMessage[];
+  sendMessage: (username: string, content: string) => void;
+  sendJoin: (username: string) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -82,6 +85,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
 
   const ws = useWebSocket();
 
+  React.useEffect(() => {
+    if (ws.connected && playerName) {
+      ws.sendJoin(playerName);
+    }
+  }, [ws.connected, playerName, ws.sendJoin]);
+
   return (
     <GameContext.Provider
       value={{
@@ -103,6 +112,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
         sendDrawOffer: ws.sendDrawOffer,
         sendDrawAccept: ws.sendDrawAccept,
         sendDrawDecline: ws.sendDrawDecline,
+        messages: ws.messages,
+        sendMessage: ws.sendMessage,
+        sendJoin: ws.sendJoin,
       }}
     >
       {children}
