@@ -26,25 +26,25 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             u.createdAt,
             CAST(COUNT(g.id) AS int),
             CAST(SUM(CASE
-                WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
-                  OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
+                WHEN (g.whitePlayer.id = u.id AND CAST(g.result AS string) = 'WHITE_WON')
+                  OR (g.blackPlayer.id = u.id AND CAST(g.result AS string) = 'BLACK_WON')
                 THEN 1 ELSE 0
             END) AS int),
             CAST(SUM(CASE
-                WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
-                  OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
+                WHEN (g.whitePlayer.id = u.id AND CAST(g.result AS string) = 'BLACK_WON')
+                  OR (g.blackPlayer.id = u.id AND CAST(g.result AS string) = 'WHITE_WON')
                 THEN 1 ELSE 0
             END) AS int),
             CAST(SUM(CASE
-                WHEN g.result = com.akshansh.chessweb.model.enums.GameResult.DRAW
+                WHEN CAST(g.result AS string) = 'DRAW'
                 THEN 1 ELSE 0
             END) AS int),
             CAST(CASE
                 WHEN COUNT(g.id) = 0 THEN 0
                 ELSE (
                     SUM(CASE
-                        WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
-                          OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
+                        WHEN (g.whitePlayer.id = u.id AND CAST(g.result AS string) = 'WHITE_WON')
+                          OR (g.blackPlayer.id = u.id AND CAST(g.result AS string) = 'BLACK_WON')
                         THEN 1 ELSE 0
                     END) * 100.0 / COUNT(g.id)
                 )
