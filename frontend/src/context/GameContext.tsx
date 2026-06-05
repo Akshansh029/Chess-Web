@@ -21,28 +21,18 @@ interface GameContextType {
   unsubscribeFromGame: () => void;
   sendMove: (
     gameId: string,
-    playerId: string,
     move: { from: string; to: string; piece: string; promotionPiece?: string },
     color: Color,
   ) => void;
-  sendResign: (gameId: string, playerId: string, playerName: string) => void;
+  sendResign: (gameId: string, playerName: string) => void;
   sendDrawOffer: (
     gameId: string,
-    playerId: string,
     playerName: string,
     opponentId: string,
     opponentName: string,
   ) => void;
-  sendDrawAccept: (
-    gameId: string,
-    offerAccepterByPlayerId: string,
-    offerAcceptedByPlayerName: string,
-  ) => void;
-  sendDrawDecline: (
-    gameId: string,
-    offerAccepterByPlayerId: string,
-    offerAcceptedByPlayerName: string,
-  ) => void;
+  sendDrawAccept: (gameId: string, offerAcceptedByPlayerName: string) => void;
+  sendDrawDecline: (gameId: string, offerAcceptedByPlayerName: string) => void;
   messages: ChatMessage[];
   sendMessage: (username: string, content: string) => void;
   sendJoin: (username: string) => void;

@@ -106,7 +106,6 @@ export const useWebSocket = () => {
   const sendMove = useCallback(
     (
       gameId: string,
-      playerId: string,
       move: {
         from: string;
         to: string;
@@ -120,7 +119,6 @@ export const useWebSocket = () => {
           destination: "/app/game.move",
           body: JSON.stringify({
             gameId,
-            playerId,
             move,
             color,
           }),
@@ -155,26 +153,21 @@ export const useWebSocket = () => {
     };
   }, []);
 
-  const sendResign = useCallback(
-    (gameId: string, playerId: string, playerName: string) => {
-      if (clientRef.current?.connected) {
-        clientRef.current.publish({
-          destination: "/app/game.resign",
-          body: JSON.stringify({
-            gameId,
-            playerId,
-            playerName,
-          }),
-        });
-      }
-    },
-    [],
-  );
+  const sendResign = useCallback((gameId: string, playerName: string) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: "/app/game.resign",
+        body: JSON.stringify({
+          gameId,
+          playerName,
+        }),
+      });
+    }
+  }, []);
 
   const sendDrawOffer = useCallback(
     (
       gameId: string,
-      playerId: string,
       playerName: string,
       opponentId: string,
       opponentName: string,
@@ -184,7 +177,6 @@ export const useWebSocket = () => {
           destination: "/app/game.draw.offer",
           body: JSON.stringify({
             gameId,
-            playerId,
             playerName,
             opponentId,
             opponentName,
@@ -196,17 +188,12 @@ export const useWebSocket = () => {
   );
 
   const sendDrawAccept = useCallback(
-    (
-      gameId: string,
-      offerAccepterByPlayerId: string,
-      offerAcceptedByPlayerName: string,
-    ) => {
+    (gameId: string, offerAcceptedByPlayerName: string) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
           destination: "/app/game.draw.accept",
           body: JSON.stringify({
             gameId,
-            offerAccepterByPlayerId,
             offerAcceptedByPlayerName,
           }),
         });
@@ -216,17 +203,12 @@ export const useWebSocket = () => {
   );
 
   const sendDrawDecline = useCallback(
-    (
-      gameId: string,
-      offerAccepterByPlayerId: string,
-      offerAcceptedByPlayerName: string,
-    ) => {
+    (gameId: string, offerAcceptedByPlayerName: string) => {
       if (clientRef.current?.connected) {
         clientRef.current.publish({
           destination: "/app/game.draw.decline",
           body: JSON.stringify({
             gameId,
-            offerAccepterByPlayerId,
             offerAcceptedByPlayerName,
           }),
         });

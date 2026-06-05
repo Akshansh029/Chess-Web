@@ -197,7 +197,6 @@ export default function ChessBoardWrapper() {
         setFen(game.fen());
         sendMove(
           gameSession!.id,
-          playerId,
           {
             from: sourceSquare,
             to: targetSquare,
@@ -286,7 +285,6 @@ export default function ChessBoardWrapper() {
           setFen(game.fen());
           sendMove(
             gameSession!.id,
-            playerId,
             {
               from: moveFrom,
               to: square,
@@ -321,7 +319,6 @@ export default function ChessBoardWrapper() {
         setFen(game.fen());
         sendMove(
           gameSession!.id,
-          playerId,
           {
             from,
             to,

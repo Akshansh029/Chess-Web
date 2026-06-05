@@ -173,7 +173,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
   const confirmResign = () => {
     if (session?.status !== GameStatus.ACTIVE) return;
-    sendResign(session.id, playerId, myName);
+    sendResign(session.id, myName);
     setShowResignConfirm(false);
   };
 
@@ -190,18 +190,18 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
     if (!oppId || !oppName) return;
 
-    sendDrawOffer(session.id, playerId, myName, oppId, oppName);
+    sendDrawOffer(session.id, myName, oppId, oppName);
     setShowDrawConfirm(false);
   };
 
   const handleAcceptDraw = () => {
     if (session?.status !== GameStatus.ACTIVE) return;
-    sendDrawAccept(session.id, playerId, myName);
+    sendDrawAccept(session.id, myName);
   };
 
   const handleDeclineDraw = () => {
     if (session?.status !== GameStatus.ACTIVE) return;
-    sendDrawDecline(session.id, playerId, myName);
+    sendDrawDecline(session.id, myName);
   };
 
   React.useEffect(() => {
