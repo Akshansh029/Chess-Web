@@ -15,4 +15,9 @@ public class UserDetailsDto {
     private int eloRating;
     private boolean isActive;
     private Instant createdAt;
+    private int gamesPlayed;
+    private int gamesWon;
+    private int gamesLost;
+    private int gamesDraw;
+    private float winPercentage;
 }

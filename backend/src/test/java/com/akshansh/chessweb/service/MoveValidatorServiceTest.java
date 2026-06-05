@@ -31,7 +31,6 @@ class MoveValidatorServiceTest {
                 .build();
         MoveRequest request = MoveRequest.builder()
                 .gameId(session.getId())
-                .playerId(whitePlayerId)
                 .move(MoveDto.builder()
                         .from("e2")
                         .to("e4")
@@ -40,7 +39,7 @@ class MoveValidatorServiceTest {
                 .color(Color.WHITE)
                 .build();
 
-        MoveResult result = service.validate(session, request);
+        MoveResult result = service.validate(session, request, whitePlayerId);
 
         assertThat(result.isValid()).isTrue();
         assertThat(result.getNewFen()).isEqualTo("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
@@ -60,7 +59,6 @@ class MoveValidatorServiceTest {
                 .build();
         MoveRequest request = MoveRequest.builder()
                 .gameId(session.getId())
-                .playerId(whitePlayerId)
                 .move(MoveDto.builder()
                         .from("e4")
                         .to("d5")
@@ -69,7 +67,7 @@ class MoveValidatorServiceTest {
                 .color(Color.WHITE)
                 .build();
 
-        MoveResult result = service.validate(session, request);
+        MoveResult result = service.validate(session, request, whitePlayerId);
 
         assertThat(result.isValid()).isTrue();
         assertThat(result.isCapture()).isTrue();

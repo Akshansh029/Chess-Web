@@ -42,7 +42,7 @@ public class GameService {
         }
 
         // Validate the move using chess rules
-        MoveResult result = moveValidator.validate(session, request);
+        MoveResult result = moveValidator.validate(session, request, currentUser.getUserId());
         if (!result.isValid()) {
             return session; // invalid move
         }

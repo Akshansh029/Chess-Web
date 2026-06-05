@@ -18,13 +18,13 @@ import java.util.UUID;
 @Service
 public class MoveValidatorService {
 
-    public MoveResult validate(GameSession session, MoveRequest request){
+    public MoveResult validate(GameSession session, MoveRequest request, UUID playerId){
 
         if(session.getStatus() != GameStatus.ACTIVE){
             return invalid("GAME_NOT_ACTIVE");
         }
 
-        Color color = resolveColor(session, request.getPlayerId());
+        Color color = resolveColor(session, playerId);
         if (color == null) {
             return invalid("PLAYER_NOT_IN_GAME");
         }

@@ -18,9 +18,43 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("""
         SELECT NEW com.akshansh.chessweb.model.dto.UserDetailsDto(
-            u.id, u.username, u.email, u.eloRating, u.isActive, u.createdAt
+            u.id,
+            u.username,
+            u.email,
+            u.eloRating,
+            u.isActive,
+            u.createdAt,
+            CAST(COUNT(g.id) AS int),
+            CAST(SUM(CASE
+                WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
+                  OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
+                THEN 1 ELSE 0
+            END) AS int),
+            CAST(SUM(CASE
+                WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
+                  OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
+                THEN 1 ELSE 0
+            END) AS int),
+            CAST(SUM(CASE
+                WHEN g.result = com.akshansh.chessweb.model.enums.GameResult.DRAW
+                THEN 1 ELSE 0
+            END) AS int),
+            CAST(CASE
+                WHEN COUNT(g.id) = 0 THEN 0
+                ELSE (
+                    SUM(CASE
+                        WHEN (g.whitePlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.WHITE_WON)
+                          OR (g.blackPlayer.id = u.id AND g.result = com.akshansh.chessweb.model.enums.GameResult.BLACK_WON)
+                        THEN 1 ELSE 0
+                    END) * 100.0 / COUNT(g.id)
+                )
+            END AS float)
         ) FROM User u
+        LEFT JOIN Game g
+            ON (g.whitePlayer.id = u.id OR g.blackPlayer.id = u.id)
+            AND g.result IS NOT NULL
         WHERE u.id = :userId
-""")
-    public UserDetailsDto fetchUserDetails(@Param("userId") UUID userId);
+        GROUP BY u.id, u.username, u.email, u.eloRating, u.isActive, u.createdAt
+    """)
+    UserDetailsDto fetchUserDetails(@Param("userId") UUID userId);
 }
