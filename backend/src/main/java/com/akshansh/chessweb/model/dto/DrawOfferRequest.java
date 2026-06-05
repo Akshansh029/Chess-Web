@@ -17,9 +17,6 @@ public class DrawOfferRequest {
     @NotNull
     private UUID gameId;
 
-    @NotNull
-    private UUID playerId;
-
     @NotBlank
     private String playerName;
 

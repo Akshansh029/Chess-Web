@@ -17,9 +17,6 @@ public class ResignRequest {
     @NotNull
     private UUID gameId;
 
-    @NotNull
-    private UUID playerId;
-
     @NotBlank
     private String playerName;
 }

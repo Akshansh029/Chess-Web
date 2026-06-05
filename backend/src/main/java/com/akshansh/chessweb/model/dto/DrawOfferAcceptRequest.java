@@ -17,9 +17,6 @@ public class DrawOfferAcceptRequest {
     @NotNull
     private UUID gameId;
 
-    @NotNull
-    private UUID offerAccepterByPlayerId;
-
     @NotBlank
     private String offerAcceptedByPlayerName;
 }

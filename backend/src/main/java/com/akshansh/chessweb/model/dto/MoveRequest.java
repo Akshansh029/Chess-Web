@@ -18,9 +18,6 @@ public class MoveRequest {
     @NotNull
     private UUID gameId;
 
-    @NotNull
-    private UUID playerId;
-
     private MoveDto move;
 
     private Color color;

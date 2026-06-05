@@ -1,81 +1,190 @@
 package com.akshansh.chessweb.service;
 
-import com.akshansh.chessweb.exception.ResourceNotFoundException;
+import com.akshansh.chessweb.exception.ForbiddenException;
+import com.akshansh.chessweb.exception.GameNotFoundException;
+import com.akshansh.chessweb.exception.PlayerNotInGameException;
+import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.model.entity.GameSession;
-import com.akshansh.chessweb.model.dto.CreateGameReqDto;
-import com.akshansh.chessweb.model.dto.JoinGameReqDto;
+import com.akshansh.chessweb.model.entity.MoveRecord;
+import com.akshansh.chessweb.model.entity.User;
 import com.akshansh.chessweb.model.entity.UserPrincipal;
-import com.akshansh.chessweb.model.enums.Color;
-import com.akshansh.chessweb.model.enums.GameStatus;
+import com.akshansh.chessweb.model.enums.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
-import static com.akshansh.chessweb.utils.ChessConstants.STARTING_FEN;
 import static com.akshansh.chessweb.utils.UserUtil.getCurrentUser;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
 
-    private final GameStore store;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final GameStore gameStore;
+    private final MoveValidatorService moveValidator;
+    private final GamePersistenceService gamePersistenceService;
 
-    public UUID createGame(CreateGameReqDto request){
+    @Transactional
+    public GameSession processMove(MoveRequest request){
         UserPrincipal currentUser = getCurrentUser();
 
-        GameSession newSession = GameSession.builder()
-                .id(UUID.randomUUID())
-                .whitePlayerId(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUserId() : null)
-                .blackPlayerId(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUserId() : null)
-                .whitePlayerName(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUsername() : null)
-                .blackPlayerName(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUsername() : null)
-                .moveRecordHistory(new ArrayList<>())
-                .currentTurn(Color.WHITE)
-                .currentFen(STARTING_FEN)
-                .status(GameStatus.WAITING)
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        // Check whether requester is part of the game
+        if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException("Player " + currentUser.getUsername() + " is not part of the game " + session.getId().toString().substring(0,5));
+        }
+
+        // Validate the move using chess rules
+        MoveResult result = moveValidator.validate(session, request);
+        if (!result.isValid()) {
+            return session; // invalid move
+        }
+
+        PieceType promotionPiece = null;
+        if (request.getMove().getPromotionPiece() != null && !request.getMove().getPromotionPiece().isBlank()) {
+            try {
+                promotionPiece = PieceType.valueOf(request.getMove().getPromotionPiece().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.error("event=pawnPromotionFailed userId={}", MDC.get("userId"));
+            }
+        }
+
+        MoveRecord moveRecord = MoveRecord.builder()
+                .moveNumber(session.getMoveRecordHistory().size() / 2 + 1)
+                .color(request.getColor())
+                .fromSquare(request.getMove().getFrom())
+                .toSquare(request.getMove().getTo())
+                .piece(request.getMove().getPiece())
+                .promotionPiece(promotionPiece)
+                .sanNotation(result.getSan())
+                .fenAfter(result.getNewFen())
+                .isCheck(result.isCheck())
+                .isCheckmate(result.isCheckmate())
+                .isCastling(result.isCastling())
+                .isCapture(result.isCapture())
+                .playedAt(Instant.now())
                 .build();
 
-        store.saveGame(newSession);
+        session.getMoveRecordHistory().add(moveRecord);
+        session.setCurrentFen(result.getNewFen());
+        session.setCurrentTurn(request.getColor().equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
+        session.setDrawOfferBy(null); // Any move declines the draw offer
 
-        return newSession.getId();
-    }
+        // Check if game over
+        if (result.isCheckmate() || result.isStalemate() || result.isInsufficientMaterial() || result.isRepetition()) {
+            GameTerminationReason terminationReason = GameTerminationReason.CHECKMATE;
 
-    public GameSession joinGame(JoinGameReqDto request){
-        UserPrincipal currentUser = getCurrentUser();
+            if(result.isInsufficientMaterial()){
+                terminationReason = GameTerminationReason.INSUFFICIENT_MATERIAL;
+            } else if (result.isStalemate()) {
+                terminationReason = GameTerminationReason.STALEMATE;
+            } else if (result.isRepetition()){
+                terminationReason = GameTerminationReason.REPETITION;
+            }
 
-        GameSession session = store.findById(request.getGameId())
-                .orElseThrow(() -> new ResourceNotFoundException("Game session not found"));
+            session.setStatus(GameStatus.ENDED);
+            session.setResult(result.isCheckmate() ? request.getColor() == Color.WHITE ? GameResult.WHITE_WON : GameResult.BLACK_WON : GameResult.DRAW);
+            session.setTerminationReason(terminationReason);
 
-        if(currentUser.getUserId().equals(session.getBlackPlayerId()) || currentUser.getUserId().equals(session.getWhitePlayerId())){
-                throw new IllegalArgumentException("Player cannot join game with himself");
+            // save the game session
+            gamePersistenceService.persist(session);
+
+            // Free memory from game store
+            gameStore.remove(session.getId().toString());
         }
-
-        if(request.getPlayerColor().equals(Color.BLACK)){
-            session.setBlackPlayerId(request.getPlayerId());
-            session.setBlackPlayerName(request.getPlayerName());
-        } else{
-            session.setWhitePlayerId(request.getPlayerId());
-            session.setWhitePlayerName(request.getPlayerName());
-        }
-
-        session.setStatus(GameStatus.ACTIVE);
-        session.setStartedAt(Instant.now());
-
-        messagingTemplate.convertAndSend(
-                "/topic/game." + session.getId(),
-                session
-        );
 
         return session;
     }
 
-    public List<GameSession> getWaitingSessions(){
-        return store.findWaitingGames();
+    @Transactional
+    public GameSession processResignation(ResignRequest request){
+        UserPrincipal currentUser = getCurrentUser();
+
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        // Check whether requester is part of the game
+        if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException("Player " + request.getPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5));
+        }
+
+        session.setStatus(GameStatus.ENDED);
+        session.setTerminationReason(GameTerminationReason.RESIGNATION);
+
+        if(currentUser.getUserId().equals(session.getWhitePlayerId())){
+            session.setResult(GameResult.BLACK_WON);
+        } else if (currentUser.getUserId().equals(session.getBlackPlayerId())){
+            session.setResult(GameResult.WHITE_WON);
+        }
+
+        // save the game session
+        gamePersistenceService.persist(session);
+
+        gameStore.remove(session.getId().toString());
+
+        return session;
+    }
+
+    public GameSession processDrawOffer(@Valid DrawOfferRequest request) {
+        UserPrincipal currentUser = getCurrentUser();
+
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        // Check whether requester is part of the game
+        if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException("Player " + request.getPlayerName() + " is not part of the game " + session.getId().toString().substring(0,5));
+        }
+
+        session.setDrawOfferBy(currentUser.getUserId());
+
+        return session;
+    }
+
+    @Transactional
+    public GameSession processDrawAccepted(@Valid DrawOfferAcceptRequest request) {
+        UserPrincipal currentUser = getCurrentUser();
+
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        // Check whether requester is part of the game
+        if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException("Player " + currentUser.getUsername() + " is not part of the game " + session.getId().toString().substring(0,5));
+        }
+
+        session.setStatus(GameStatus.ENDED);
+        session.setResult(GameResult.DRAW);
+        session.setTerminationReason(GameTerminationReason.DRAW_ACCEPTED);
+        session.setDrawOfferBy(null);
+
+        // save the game session
+        gamePersistenceService.persist(session);
+
+        gameStore.remove(session.getId().toString());
+
+        return session;
+    }
+
+    public GameSession processDrawDeclined(@Valid DrawOfferAcceptRequest request) {
+        UserPrincipal currentUser = getCurrentUser();
+
+        GameSession session = gameStore.findById(request.getGameId())
+                .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        // Check whether requester is part of the game
+        if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
+            throw new PlayerNotInGameException("Player " + currentUser.getUsername() + " is not part of the game " + session.getId().toString().substring(0,5));
+        }
+
+        session.setDrawOfferBy(null);
+        return session;
     }
 }

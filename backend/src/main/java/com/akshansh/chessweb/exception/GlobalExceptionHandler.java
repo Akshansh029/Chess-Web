@@ -57,12 +57,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PlayerNotInGameException.class)
     public ResponseEntity<ErrorResponse> handlePlayerNotInGame(PlayerNotInGameException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Player not part of the game",
+                HttpStatus.FORBIDDEN.value(),
+                "Unauthorized action",
                 ex.getMessage(),
                 request.getDescription(false)
         );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -225,7 +225,7 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-        log.warn("Client error event=accessDenied status=400 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
+        log.warn("Client error event=accessDenied status=403 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 MDC.get("userId"),
