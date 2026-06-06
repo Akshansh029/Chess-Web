@@ -82,7 +82,7 @@ export const GameOverModal = ({
               Total Moves
             </span>
             <span className="font-mono font-semibold text-white">
-              {(session.moveRecordHistory || []).length} moves
+              {(session.moveDtoHistory || []).length} moves
             </span>
           </div>
         </div>

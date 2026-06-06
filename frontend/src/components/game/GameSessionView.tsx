@@ -61,7 +61,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     }
   }, [session?.currentFen, setFen]);
 
-  const prevMovesLength = React.useRef(session?.moveRecordHistory?.length || 0);
+  const prevMovesLength = React.useRef(session?.moveDtoHistory?.length || 0);
   const prevStatus = React.useRef<GameStatus | undefined>(undefined);
   const isFirstLoad = React.useRef(true);
 
@@ -85,7 +85,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
         playSound("notify");
       } else if (prevStatus.current === undefined) {
         const isBrandNewGame =
-          !session.moveRecordHistory || session.moveRecordHistory.length === 0;
+          !session.moveDtoHistory || session.moveDtoHistory.length === 0;
         if (isBrandNewGame) {
           playSound("notify");
         }
@@ -97,9 +97,9 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
 
   // Track game moves and play appropriate game sounds
   React.useEffect(() => {
-    if (!session?.moveRecordHistory) return;
+    if (!session?.moveDtoHistory) return;
 
-    const currentLength = session.moveRecordHistory.length;
+    const currentLength = session.moveDtoHistory.length;
 
     // No sound on initial mount or refresh
     if (isFirstLoad.current) {
@@ -109,7 +109,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     }
 
     if (currentLength > prevMovesLength.current) {
-      const lastMove = session.moveRecordHistory[currentLength - 1];
+      const lastMove = session.moveDtoHistory[currentLength - 1];
 
       const isCastling = lastMove.isCastling;
       lastMove.sanNotation?.includes("O-O") || false;
@@ -134,7 +134,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     }
 
     prevMovesLength.current = currentLength;
-  }, [session?.moveRecordHistory, playSound]);
+  }, [session?.moveDtoHistory, playSound]);
 
   const prevMessagesLength = React.useRef(messages.length);
 
@@ -213,6 +213,8 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
       </div>
     );
   }
+
+  console.log(session);
 
   const isWaiting = session.status === GameStatus.WAITING;
   const isGameActive = session.status === GameStatus.ACTIVE;
@@ -309,7 +311,7 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
           <div className="flex-1 min-h-0">
             {activeTab === "moves" ? (
               <MoveHistoryTable
-                moves={session.moveRecordHistory || []}
+                moves={session.moveDtoHistory || []}
                 noBorder={true}
               />
             ) : (

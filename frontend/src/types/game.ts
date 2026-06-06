@@ -56,7 +56,7 @@ export interface GameSession {
   status: GameStatus;
   currentFen: string;
   currentTurn: Color;
-  moveRecordHistory: Move[];
+  moveDtoHistory: Move[];
   startedAt?: string;
   result?: GameResult | null;
   terminationReason?: GameTerminationReason | null;

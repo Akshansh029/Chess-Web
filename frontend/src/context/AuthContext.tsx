@@ -8,7 +8,6 @@ import React, {
   ReactNode,
 } from "react";
 import { authApi, RegisterRequest } from "@/services/auth";
-import { useGame } from "@/context/GameContext";
 
 interface UserProfile {
   id: string;
@@ -49,7 +48,6 @@ function parseJwt(token: string) {
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { setPlayerName, setPlayerId } = useGame();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -64,8 +62,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         email: decoded.email,
       };
       setUser(profile);
-      setPlayerName(profile.name); // synchronize with GameContext
-      setPlayerId(profile.id); // synchronize with GameContext
     }
   };
 
@@ -110,15 +106,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           // Clean up user session
           setUser(null);
           setAccessToken(null);
-          setPlayerName("");
-          setPlayerId("");
         }
       },
       Math.max(0, delay),
     );
 
     return () => clearTimeout(refreshTimer);
-  }, [accessToken, setPlayerName, setPlayerId]);
+  }, [accessToken]);
 
   const login = async (email: string, password?: string) => {
     setIsLoading(true);
@@ -161,8 +155,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setUser(null);
       setAccessToken(null);
-      setPlayerName(""); // clear from GameContext
-      setPlayerId(""); // clear from GameContext
       setIsLoading(false);
     }
   };

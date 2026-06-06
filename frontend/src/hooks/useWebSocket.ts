@@ -2,10 +2,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { ChatMessage, MessageType, GameSession, Color } from "@/types/game";
+import { useAuth } from "@/context/AuthContext";
 
 const WS_URL = "http://localhost:8080/ws";
 
 export const useWebSocket = () => {
+  const { accessToken } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
   const [connected, setConnected] = useState(false);
@@ -31,6 +33,11 @@ export const useWebSocket = () => {
       const client = new Client({
         webSocketFactory: () =>
           new SockJS(WS_URL, null, { transports: ["websocket"] }),
+        connectHeaders: accessToken
+          ? {
+              Authorization: `Bearer ${accessToken}`,
+            }
+          : undefined,
         onConnect: () => {
           setConnected(true);
           client.subscribe("/topic/public", onPublicMessageReceived);
@@ -50,7 +57,7 @@ export const useWebSocket = () => {
       client.activate();
       clientRef.current = client;
     },
-    [onPublicMessageReceived],
+    [onPublicMessageReceived, accessToken],
   );
 
   const subscribeToGame = useCallback(
@@ -152,6 +159,14 @@ export const useWebSocket = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (clientRef.current && accessToken) {
+      clientRef.current.connectHeaders = {
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
+  }, [accessToken]);
 
   const sendResign = useCallback((gameId: string, playerName: string) => {
     if (clientRef.current?.connected) {

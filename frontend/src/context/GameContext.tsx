@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Color, GameSession, ChatMessage } from "@/types/game";
 import { v4 as uuidv4 } from "uuid";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useAuth } from "@/context/AuthContext";
 
 interface GameContextType {
   playerName: string;
@@ -43,6 +44,7 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export const GameProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const { user } = useAuth();
   const [playerName, setPlayerNameState] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("chess_player_name") || "";
@@ -72,6 +74,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
   };
+
+  React.useEffect(() => {
+    if (user) {
+      setPlayerName(user.name);
+      setPlayerId(user.id);
+    } else {
+      setPlayerName("");
+      setPlayerId("");
+    }
+  }, [user]);
 
   const ws = useWebSocket();
 
