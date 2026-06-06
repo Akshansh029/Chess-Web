@@ -14,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import static com.akshansh.chessweb.utils.UserUtil.getCurrentUser;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,8 +24,7 @@ public class GameService {
     private final GamePersistenceService gamePersistenceService;
 
     @Transactional
-    public GameSession processMove(MoveRequest request){
-        UserPrincipal currentUser = getCurrentUser();
+    public GameSession processMove(MoveRequest request, UserPrincipal currentUser){
 
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
@@ -100,8 +97,7 @@ public class GameService {
     }
 
     @Transactional
-    public GameSession processResignation(ResignRequest request){
-        UserPrincipal currentUser = getCurrentUser();
+    public GameSession processResignation(ResignRequest request, UserPrincipal currentUser){
 
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
@@ -128,8 +124,7 @@ public class GameService {
         return session;
     }
 
-    public GameSession processDrawOffer(@Valid DrawOfferRequest request) {
-        UserPrincipal currentUser = getCurrentUser();
+    public GameSession processDrawOffer(@Valid DrawOfferRequest request, UserPrincipal currentUser) {
 
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
@@ -145,9 +140,10 @@ public class GameService {
     }
 
     @Transactional
-    public GameSession processDrawAccepted(@Valid DrawOfferAcceptRequest request) {
-        UserPrincipal currentUser = getCurrentUser();
-
+    public GameSession processDrawAccepted(
+            @Valid DrawOfferAcceptRequest request,
+            UserPrincipal currentUser
+    ) {
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
 
@@ -169,9 +165,10 @@ public class GameService {
         return session;
     }
 
-    public GameSession processDrawDeclined(@Valid DrawOfferAcceptRequest request) {
-        UserPrincipal currentUser = getCurrentUser();
-
+    public GameSession processDrawDeclined(
+            @Valid DrawOfferAcceptRequest request,
+            UserPrincipal currentUser
+    ) {
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
 

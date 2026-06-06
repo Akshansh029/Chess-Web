@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -55,12 +56,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PlayerNotInGameException.class)
-    public ResponseEntity<ErrorResponse> handlePlayerNotInGame(PlayerNotInGameException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handlePlayerNotInGame(PlayerNotInGameException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 "Unauthorized action",
                 ex.getMessage(),
-                request.getDescription(false)
+                request.getRequestURI()
+        );
+        log.warn("Client error event=playerNotInGame status=403 method={} uri={} errorType={} message=\"{}\" requestId={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                MDC.get("requestId")
         );
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
@@ -99,6 +107,24 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         log.warn("Client error event=invalidAuthCode status=401 method={} uri={} errorType={} message=\"{}\" requestId={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                MDC.get("requestId")
+        );
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthenticatedUser(AuthenticationCredentialsNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        log.warn("Client error event=unauthenticatedUser status=401 method={} uri={} errorType={} message=\"{}\" requestId={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 ex.getClass().getSimpleName(),

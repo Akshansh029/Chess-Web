@@ -35,7 +35,7 @@ public class LobbyService {
                 .blackPlayerId(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUserId() : null)
                 .whitePlayerName(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUsername() : null)
                 .blackPlayerName(request.getPlayerColor().equals(Color.BLACK) ? currentUser.getUsername() : null)
-                .moveRecordHistory(new ArrayList<>())
+                .moveDtoHistory(new ArrayList<>())
                 .currentTurn(Color.WHITE)
                 .currentFen(STARTING_FEN)
                 .status(GameStatus.WAITING)
