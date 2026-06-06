@@ -35,20 +35,16 @@ export interface Move {
   from: string;
   to: string;
   piece: string;
-  timestamp?: string;
+  playedAt?: string;
   moveNumber?: number;
   color?: Color;
   sanNotation?: string;
   fromSquare?: string;
   toSquare?: string;
   isCapture?: boolean;
-  capture?: boolean;
   isCheck?: boolean;
-  check?: boolean;
   isCheckmate?: boolean;
-  checkmate?: boolean;
   isCastling?: boolean;
-  castling?: boolean;
 }
 
 export interface GameSession {

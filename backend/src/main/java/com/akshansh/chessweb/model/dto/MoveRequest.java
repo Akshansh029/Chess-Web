@@ -1,7 +1,6 @@
 package com.akshansh.chessweb.model.dto;
 
 import com.akshansh.chessweb.model.enums.Color;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,7 @@ public class MoveRequest {
     @NotNull
     private UUID gameId;
 
-    private MoveDto move;
+    private RequestMoveDto move;
 
     private Color color;
 }

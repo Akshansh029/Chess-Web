@@ -1,10 +1,10 @@
 package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.model.entity.GameSession;
-import com.akshansh.chessweb.model.dto.MoveDto;
+import com.akshansh.chessweb.model.dto.RequestMoveDto;
 import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;
-import com.akshansh.chessweb.model.entity.MoveRecord;
+import com.akshansh.chessweb.model.entity.MoveDto;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameStatus;
 import com.github.bhlangonijr.chesslib.*;
@@ -34,9 +34,9 @@ public class MoveValidatorService {
         }
 
         Board board = new Board();
-        if (session.getMoveRecordHistory() != null && !session.getMoveRecordHistory().isEmpty()) {
-            for (MoveRecord historyMoveRecord : session.getMoveRecordHistory()) {
-                Move m = buildMove(historyMoveRecord);
+        if (session.getMoveDtoHistory() != null && !session.getMoveDtoHistory().isEmpty()) {
+            for (MoveDto historyMoveDto : session.getMoveDtoHistory()) {
+                Move m = buildMove(historyMoveDto);
                 if (m != null) {
                     board.doMove(m);
                 }
@@ -45,7 +45,7 @@ public class MoveValidatorService {
             board.loadFromFen(session.getCurrentFen());
         }
 
-        MoveDto dto = request.getMove();
+        RequestMoveDto dto = request.getMove();
         Move move = buildMove(board, dto);
         if (move == null) {
             return invalid("MALFORMED_MOVE");
@@ -89,14 +89,14 @@ public class MoveValidatorService {
         }
     }
 
-    private Move buildMove(Board board, MoveDto dto) {
+    private Move buildMove(Board board, RequestMoveDto requestMoveDto) {
         try {
-            Square from = Square.fromValue(dto.getFrom().toUpperCase()); // "e2" → E2
-            Square to   = Square.fromValue(dto.getTo().toUpperCase());   // "e4" → E4
+            Square from = Square.fromValue(requestMoveDto.getFrom().toUpperCase()); // "e2" → E2
+            Square to   = Square.fromValue(requestMoveDto.getTo().toUpperCase());   // "e4" → E4
 
-            if (dto.getPromotionPiece() != null && !dto.getPromotionPiece().isEmpty()) {
+            if (requestMoveDto.getPromotionPiece() != null && !requestMoveDto.getPromotionPiece().isEmpty()) {
                 Side side = board.getPiece(from).getPieceSide();
-                String symbol = dto.getPromotionPiece().toUpperCase();
+                String symbol = requestMoveDto.getPromotionPiece().toUpperCase();
                 Piece promo;
                 if (side == Side.WHITE) {
                     promo = Piece.fromFenSymbol(symbol);
@@ -130,15 +130,15 @@ public class MoveValidatorService {
         return MoveResult.builder().valid(false).rejectionReason(reason).build();
     }
 
-    private Move buildMove(MoveRecord moveRecord) {
+    private Move buildMove(MoveDto moveDto) {
         try {
-            Square from = Square.fromValue(moveRecord.getFromSquare().toUpperCase());
-            Square to   = Square.fromValue(moveRecord.getToSquare().toUpperCase());
+            Square from = Square.fromValue(moveDto.getFromSquare().toUpperCase());
+            Square to   = Square.fromValue(moveDto.getToSquare().toUpperCase());
 
-            if (moveRecord.getPromotionPiece() != null) {
-                boolean isWhite = moveRecord.getColor() == Color.WHITE;
+            if (moveDto.getPromotionPiece() != null) {
+                boolean isWhite = moveDto.getColor() == Color.WHITE;
                 String symbol = "";
-                switch (moveRecord.getPromotionPiece()) {
+                switch (moveDto.getPromotionPiece()) {
                     case Q: symbol = "q"; break;
                     case R: symbol = "r"; break;
                     case B: symbol = "b"; break;
@@ -158,7 +158,7 @@ public class MoveValidatorService {
         }
     }
 
-    private boolean isCastling(MoveDto dto) {
+    private boolean isCastling(RequestMoveDto dto) {
         // Castling is always king moving exactly 2 squares horizontally
         return dto.getFrom().charAt(0) == 'e' &&
                 (dto.getTo().equals("g1") || dto.getTo().equals("c1") ||

@@ -1,7 +1,7 @@
 package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.model.entity.GameSession;
-import com.akshansh.chessweb.model.dto.MoveDto;
+import com.akshansh.chessweb.model.dto.RequestMoveDto;
 import com.akshansh.chessweb.model.dto.MoveRequest;
 import com.akshansh.chessweb.model.dto.MoveResult;
 import com.akshansh.chessweb.model.enums.Color;
@@ -31,7 +31,7 @@ class MoveValidatorServiceTest {
                 .build();
         MoveRequest request = MoveRequest.builder()
                 .gameId(session.getId())
-                .move(MoveDto.builder()
+                .move(RequestMoveDto.builder()
                         .from("e2")
                         .to("e4")
                         .piece(PieceType.P)
@@ -59,7 +59,7 @@ class MoveValidatorServiceTest {
                 .build();
         MoveRequest request = MoveRequest.builder()
                 .gameId(session.getId())
-                .move(MoveDto.builder()
+                .move(RequestMoveDto.builder()
                         .from("e4")
                         .to("d5")
                         .piece(PieceType.P)

@@ -2,10 +2,7 @@ package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.exception.ResourceNotFoundException;
 import com.akshansh.chessweb.model.dto.GameDto;
-import com.akshansh.chessweb.model.entity.Game;
-import com.akshansh.chessweb.model.entity.GameSession;
-import com.akshansh.chessweb.model.entity.MoveRecord;
-import com.akshansh.chessweb.model.entity.User;
+import com.akshansh.chessweb.model.entity.*;
 import com.akshansh.chessweb.model.enums.Color;
 import com.akshansh.chessweb.model.enums.GameResult;
 import com.akshansh.chessweb.repository.GameRepository;
@@ -46,9 +43,9 @@ public class GamePersistenceService {
 
     @Transactional
     public void persist(GameSession session){
-        List<MoveRecord> moves = session.getMoveRecordHistory() == null
+        List<MoveDto> moveDtos = session.getMoveDtoHistory() == null
                 ? Collections.emptyList()
-                : session.getMoveRecordHistory();
+                : session.getMoveDtoHistory();
 
         User whitePlayer = userRepo.findById(session.getWhitePlayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("White player user not found"));
@@ -66,7 +63,7 @@ public class GamePersistenceService {
                 .terminationReason(session.getTerminationReason())
                 .pgn(buildPgn(session))
                 .finalFen(session.getCurrentFen())
-                .totalMoves(moves.size())
+                .totalMoves(moveDtos.size())
                 .startedAt(session.getStartedAt())
                 .endedAt(Instant.now())
                 .build();
@@ -75,9 +72,9 @@ public class GamePersistenceService {
         gameRepo.save(game);
 
         // save moves
-        moveRepo.saveAll(moves.stream()
+        moveRepo.saveAll(moveDtos.stream()
                 .filter(Objects::nonNull)
-                .map(move -> copyMoveRecordForPersistence(move, game))
+                .map(moveDto -> copyMoveRecordForPersistence(moveDto, game))
                 .toList());
         log.info("event=gameSaved userId={} gameId={}", MDC.get("userId"), game.getId());
     }
@@ -97,22 +94,22 @@ public class GamePersistenceService {
         return result;
     }
 
-    private MoveRecord copyMoveRecordForPersistence(MoveRecord move, Game game) {
+    private MoveRecord copyMoveRecordForPersistence(MoveDto moveDto, Game game) {
         return MoveRecord.builder()
                 .gameId(game)
-                .moveNumber(move.getMoveNumber())
-                .color(move.getColor())
-                .fromSquare(move.getFromSquare())
-                .toSquare(move.getToSquare())
-                .piece(move.getPiece())
-                .promotionPiece(move.getPromotionPiece())
-                .isCapture(move.isCapture())
-                .isCheck(move.isCheck())
-                .isCheckmate(move.isCheckmate())
-                .isCastling(move.isCastling())
-                .sanNotation(move.getSanNotation())
-                .fenAfter(move.getFenAfter())
-                .playedAt(move.getPlayedAt())
+                .moveNumber(moveDto.getMoveNumber())
+                .color(moveDto.getColor())
+                .fromSquare(moveDto.getFromSquare())
+                .toSquare(moveDto.getToSquare())
+                .piece(moveDto.getPiece())
+                .promotionPiece(moveDto.getPromotionPiece())
+                .isCapture(moveDto.isCapture())
+                .isCheck(moveDto.isCheck())
+                .isCheckmate(moveDto.isCheckmate())
+                .isCastling(moveDto.isCastling())
+                .sanNotation(moveDto.getSanNotation())
+                .fenAfter(moveDto.getFenAfter())
+                .playedAt(moveDto.getPlayedAt())
                 .build();
     }
 
@@ -131,48 +128,48 @@ public class GamePersistenceService {
             pgn.append(tag("Termination", session.getTerminationReason().name()));
         }
 
-        String movetext = buildMovetext(session.getMoveRecordHistory(), result);
+        String movetext = buildMovetext(session.getMoveDtoHistory(), result);
         return pgn.append('\n')
                 .append(movetext)
                 .toString();
     }
 
-    private String buildMovetext(@NonNull List<MoveRecord> moves, String result) {
+    private String buildMovetext(@NonNull List<MoveDto> moveDtos, String result) {
         StringBuilder movetext = new StringBuilder();
 
         int currentMoveNumber = -1;
 
-        List<MoveRecord> orderedMoves = moves.stream()
+        List<MoveDto> orderedMoveDtos = moveDtos.stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator
-                        .comparingInt(MoveRecord::getMoveNumber)
-                        .thenComparing(move -> move.getColor() == Color.WHITE ? 0 : 1))
+                        .comparingInt(MoveDto::getMoveNumber)
+                        .thenComparing(moveDto -> moveDto.getColor() == Color.WHITE ? 0 : 1))
                 .toList();
 
-        for (MoveRecord move : orderedMoves) {
-            if (move.getSanNotation() == null || move.getSanNotation().isBlank()) {
+        for (MoveDto moveDto : orderedMoveDtos) {
+            if (moveDto.getSanNotation() == null || moveDto.getSanNotation().isBlank()) {
                 continue;
             }
 
-            if (move.getColor() == Color.WHITE) {
+            if (moveDto.getColor() == Color.WHITE) {
                 if (!movetext.isEmpty()) {
                     movetext.append(' ');
                 }
-                movetext.append(move.getMoveNumber())
+                movetext.append(moveDto.getMoveNumber())
                         .append(". ")
-                        .append(move.getSanNotation());
-                currentMoveNumber = move.getMoveNumber();
+                        .append(moveDto.getSanNotation());
+                currentMoveNumber = moveDto.getMoveNumber();
                 continue;
             }
 
             if (!movetext.isEmpty()) {
                 movetext.append(' ');
             }
-            if (currentMoveNumber != move.getMoveNumber()) {
-                movetext.append(move.getMoveNumber()).append("... ");
+            if (currentMoveNumber != moveDto.getMoveNumber()) {
+                movetext.append(moveDto.getMoveNumber()).append("... ");
             }
-            movetext.append(move.getSanNotation());
-            currentMoveNumber = move.getMoveNumber();
+            movetext.append(moveDto.getSanNotation());
+            currentMoveNumber = moveDto.getMoveNumber();
         }
 
         if (!movetext.isEmpty()) {

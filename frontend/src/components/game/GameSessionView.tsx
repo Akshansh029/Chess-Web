@@ -111,24 +111,16 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     if (currentLength > prevMovesLength.current) {
       const lastMove = session.moveRecordHistory[currentLength - 1];
 
-      const isCastling =
-        lastMove.isCastling ||
-        lastMove.castling ||
-        lastMove.sanNotation?.includes("O-O") ||
-        false;
+      const isCastling = lastMove.isCastling;
+      lastMove.sanNotation?.includes("O-O") || false;
       const isCheck =
         lastMove.isCheck ||
-        lastMove.check ||
         lastMove.isCheckmate ||
-        lastMove.checkmate ||
         lastMove.sanNotation?.includes("+") ||
         lastMove.sanNotation?.includes("#") ||
         false;
       const isCapture =
-        lastMove.isCapture ||
-        lastMove.capture ||
-        lastMove.sanNotation?.includes("x") ||
-        false;
+        lastMove.isCapture || lastMove.sanNotation?.includes("x") || false;
 
       if (isCastling) {
         playSound("castle");
