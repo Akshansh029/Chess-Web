@@ -74,8 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           handleAuthSuccess(response.accessToken);
         }
       } catch (err) {
-        // Silent catch: user is simply not logged in
-        console.log("No active session found or session expired.");
+        console.warn("No active session found or session expired.");
       } finally {
         setIsLoading(false);
       }
@@ -96,7 +95,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const refreshTimer = setTimeout(
       async () => {
         try {
-          console.log("Initiating silent token refresh...");
           const response = await authApi.refresh();
           if (response.accessToken) {
             handleAuthSuccess(response.accessToken);

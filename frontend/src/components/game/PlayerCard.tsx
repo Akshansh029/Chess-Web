@@ -53,7 +53,7 @@ export const PlayerCard = ({
         </div>
 
         <p className="text-[10px] font-medium text-foreground/40 uppercase tracking-wider mt-1">
-          Rank: Unranked
+          Rank: Ranked
         </p>
       </div>
     </div>

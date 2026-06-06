@@ -69,7 +69,7 @@ export const GameShell: React.FC<GameShellProps> = ({
                     className={`w-2 h-2 rounded-full ${connected ? "bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]" : "bg-red-500 shadow-[0_0_5px_#ef4444]"}`}
                   ></div>
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
-                    {connected ? "Relay Active" : "Offline"}
+                    {connected ? "Online" : "Offline"}
                   </span>
                 </div>
               )}

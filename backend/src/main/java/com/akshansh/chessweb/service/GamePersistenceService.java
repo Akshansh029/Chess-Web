@@ -36,6 +36,7 @@ public class GamePersistenceService {
 
     private static final DateTimeFormatter PGN_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneOffset.UTC);
+    private static final int K_VALUE = 15;
 
     private final GameRepository gameRepo;
     private final MoveRepository moveRepo;
@@ -70,6 +71,17 @@ public class GamePersistenceService {
 
         // save the game
         gameRepo.save(game);
+
+        // calculate new elo for players
+        int[] results = calculate2PlayerElo(
+                whitePlayer.getEloRating(),
+                blackPlayer.getEloRating(),
+                session.getResult());
+        whitePlayer.setEloRating(results[0]);
+        blackPlayer.setEloRating(results[1]);
+
+        // save elo ratings
+        userRepo.saveAll(List.of(whitePlayer, blackPlayer));
 
         // save moves
         moveRepo.saveAll(moveDtos.stream()
@@ -202,5 +214,30 @@ public class GamePersistenceService {
             case BLACK_WON -> "0-1";
             case DRAW -> "1/2-1/2";
         };
+    }
+
+    private static int[] calculate2PlayerElo(double rating1, double rating2, GameResult result) {
+
+        double outcome;
+
+        if(result == GameResult.WHITE_WON) outcome = 1.0;
+        else if (result == GameResult.BLACK_WON) outcome = 0.0;
+        else outcome = 0.5;
+
+        // expected score for Player 1
+        // E1 = 1 / (1 + 10^((R2 - R1) / 400))
+        double expected1 = 1.0 / (1.0 + Math.pow(10, (rating2 - rating1) / 400.0));
+
+        // expected score for Player 2
+        double expected2 = 1.0 / (1.0 + Math.pow(10, (rating1 - rating2) / 400.0));
+
+        // Actual score for Player 2
+        double actual2 = 1 - outcome;
+
+        // NewRating = OldRating + K * (Actual - Expected)
+        double newRating1 = rating1 + K_VALUE * (outcome - expected1);
+        double newRating2 = rating2 + K_VALUE * (actual2 - expected2);
+
+        return new int[]{(int) Math.round(newRating1), (int) Math.round(newRating2)};
     }
 }
