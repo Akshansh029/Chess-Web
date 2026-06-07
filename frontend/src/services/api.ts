@@ -18,11 +18,12 @@ export const gameApi = {
     playerId: string,
     playerName: string,
     playerColor: Color,
+    timeControl: string,
   ): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/create`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify({ playerId, playerName, playerColor }),
+      body: JSON.stringify({ playerId, playerName, playerColor, timeControl }),
       credentials: "include",
     });
     if (!response.ok) {

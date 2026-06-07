@@ -34,12 +34,14 @@ export default function LobbyPage() {
     }
   }, [isAuthenticated, connected, connect, router]);
 
-  const handleCreateGame = async () => {
+  const handleCreateGame = async (color: Color, timeControl: string) => {
+    setPlayerColor(color);
     try {
       const gameId = await gameApi.createGame(
         playerId,
         playerName,
-        playerColor,
+        color,
+        timeControl,
       );
       toast.success("Game arena created! Waiting for opponent.");
       router.push(`/game/${gameId}`);

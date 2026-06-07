@@ -65,6 +65,11 @@ export interface GameSession {
   result?: GameResult | null;
   terminationReason?: GameTerminationReason | null;
   drawOfferBy?: string | null;
+  whiteTimeRemainingMs?: number | null;
+  blackTimeRemainingMs?: number | null;
+  turnStartedAt?: string | null;
+  incrementMs: number | null;
+  timeControl: string | null;
 }
 
 export interface ChatMessage {

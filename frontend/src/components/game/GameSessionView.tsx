@@ -214,8 +214,6 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
     );
   }
 
-  console.log(session);
-
   const isWaiting = session.status === GameStatus.WAITING;
   const isGameActive = session.status === GameStatus.ACTIVE;
   const opponentName =
@@ -246,6 +244,13 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
               ? capturedInfo.whiteLead
               : capturedInfo.blackLead
           }
+          timeRemainingMs={
+            opponentColor === Color.WHITE
+              ? session.whiteTimeRemainingMs
+              : session.blackTimeRemainingMs
+          }
+          isGameActive={isGameActive}
+          timeControl={session.timeControl}
         />
         <PlayerCard
           name={myName}
@@ -262,6 +267,13 @@ const GameSessionView: React.FC<GameSessionViewProps> = ({
               ? capturedInfo.whiteLead
               : capturedInfo.blackLead
           }
+          timeRemainingMs={
+            myColor === Color.WHITE
+              ? session.whiteTimeRemainingMs
+              : session.blackTimeRemainingMs
+          }
+          isGameActive={isGameActive}
+          timeControl={session.timeControl}
         />
       </div>
 
