@@ -36,6 +36,12 @@ public class GameStore {
                 .collect(Collectors.toList());
     }
 
+    public List<GameSession> findActiveGames() {
+        return store.values().stream()
+                .filter(g -> g.getStatus() == GameStatus.ACTIVE)
+                .collect(Collectors.toList());
+    }
+
     public boolean exists(String gameId) {
         return store.containsKey(gameId);
     }
