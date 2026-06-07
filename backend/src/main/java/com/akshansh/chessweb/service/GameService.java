@@ -87,7 +87,9 @@ public class GameService {
             session.setTerminationReason(terminationReason);
 
             // save the game session
-            gamePersistenceService.persist(session);
+            int[] eloResults = gamePersistenceService.persist(session);
+            session.setWhitePlayerNewElo(eloResults[0]);
+            session.setBlackPlayerNewElo(eloResults[1]);
 
             // Free memory from game store
             gameStore.remove(session.getId().toString());
@@ -117,7 +119,9 @@ public class GameService {
         }
 
         // save the game session
-        gamePersistenceService.persist(session);
+        int[] eloResults = gamePersistenceService.persist(session);
+        session.setWhitePlayerNewElo(eloResults[0]);
+        session.setBlackPlayerNewElo(eloResults[1]);
 
         gameStore.remove(session.getId().toString());
 
@@ -158,7 +162,9 @@ public class GameService {
         session.setDrawOfferBy(null);
 
         // save the game session
-        gamePersistenceService.persist(session);
+        int[] eloResults = gamePersistenceService.persist(session);
+        session.setWhitePlayerNewElo(eloResults[0]);
+        session.setBlackPlayerNewElo(eloResults[1]);
 
         gameStore.remove(session.getId().toString());
 

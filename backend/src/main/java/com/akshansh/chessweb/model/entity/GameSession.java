@@ -19,11 +19,14 @@ public class GameSession {
     private UUID blackPlayerId;
     private String whitePlayerName;
     private String blackPlayerName;
+    private int whitePlayerNewElo;
+    private int blackPlayerNewElo;
+    private int whitePlayerOldElo;
+    private int blackPlayerOldElo;
     private GameStatus status;
     private GameResult result;
     private GameTerminationReason terminationReason;
     private Instant startedAt;
-
     private String currentFen;
     private Color currentTurn;
     private List<MoveDto> moveDtoHistory;

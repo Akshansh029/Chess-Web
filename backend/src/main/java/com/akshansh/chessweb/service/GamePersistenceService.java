@@ -43,7 +43,7 @@ public class GamePersistenceService {
     private final UserRepository userRepo;
 
     @Transactional
-    public void persist(GameSession session){
+    public int[] persist(GameSession session){
         List<MoveDto> moveDtos = session.getMoveDtoHistory() == null
                 ? Collections.emptyList()
                 : session.getMoveDtoHistory();
@@ -72,6 +72,12 @@ public class GamePersistenceService {
         // save the game
         gameRepo.save(game);
 
+        // set old elo ratings on session before calculation
+        session.setWhitePlayerOldElo(whitePlayer.getEloRating());
+        if (blackPlayer != null) {
+            session.setBlackPlayerOldElo(blackPlayer.getEloRating());
+        }
+
         // calculate new elo for players
         int[] results = calculate2PlayerElo(
                 whitePlayer.getEloRating(),
@@ -88,7 +94,9 @@ public class GamePersistenceService {
                 .filter(Objects::nonNull)
                 .map(moveDto -> copyMoveRecordForPersistence(moveDto, game))
                 .toList());
+
         log.info("event=gameSaved userId={} gameId={}", MDC.get("userId"), game.getId());
+        return results;
     }
 
     @Transactional
