@@ -1,6 +1,7 @@
 import { parseBackendError } from "@/utils/error";
 
-const AUTH_BASE_URL = "http://localhost:8080/api/auth";
+const HOST_URL = process.env.NEXT_PUBLIC_API_URL;
+const AUTH_BASE_URL = `${HOST_URL}/api/auth`;
 
 export interface LoginResponse {
   message: string;

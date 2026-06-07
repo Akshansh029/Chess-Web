@@ -25,7 +25,7 @@ export const formatTime = (ms: number): string => {
   if (ms < 10000) {
     // Under 10 seconds: show tenths of a second
     const tenths = Math.floor((ms % 1000) / 100);
-    return `${seconds}.${tenths}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}.${tenths}`;
   }
 
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;

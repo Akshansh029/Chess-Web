@@ -123,15 +123,30 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
                   </div>
 
                   <div className="flex items-center justify-between relative z-10 text-white">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-foreground/30">
-                        Your Alignment
-                      </p>
-                      <p
-                        className={`font-semibold uppercase tracking-wider ${availableColor === Color.WHITE ? "text-white" : "text-slate-400"}`}
-                      >
-                        {availableColor}
-                      </p>
+                    <div className="flex items-center gap-6">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-foreground/30">
+                          Your Alignment
+                        </p>
+                        <p
+                          className={`font-semibold uppercase tracking-wider ${availableColor === Color.WHITE ? "text-white" : "text-slate-400"}`}
+                        >
+                          {availableColor}
+                        </p>
+                      </div>
+                      {game.timeControl && (
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-foreground/30">
+                            Time Control
+                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={14} className="text-primary" />
+                            <p className="font-semibold tracking-wider text-white">
+                              {game.timeControl}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => onJoinGame(game.id, hostColor)}

@@ -2,11 +2,13 @@ import { Color, GameSession } from "@/types/game";
 import { GameHistoryDto, PageResponse, UserProfileDto } from "@/types/user";
 import { parseBackendError } from "@/utils/error";
 
-const HOST_URL = "http://localhost:8080";
+const HOST_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_BASE_URL = `${HOST_URL}/api/games`;
 
 const getHeaders = (token?: string | null) => {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }

@@ -4,7 +4,7 @@ import SockJS from "sockjs-client";
 import { ChatMessage, MessageType, GameSession, Color } from "@/types/game";
 import { useAuth } from "@/context/AuthContext";
 
-const WS_URL = "http://localhost:8080/ws";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL!;
 
 export const useWebSocket = () => {
   const { accessToken } = useAuth();
