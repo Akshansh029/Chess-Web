@@ -53,6 +53,10 @@ export interface GameSession {
   blackPlayerId?: string | null;
   whitePlayerName?: string | null;
   blackPlayerName?: string | null;
+  whitePlayerNewElo?: number | null;
+  blackPlayerNewElo?: number | null;
+  whitePlayerOldElo?: number | null;
+  blackPlayerOldElo?: number | null;
   status: GameStatus;
   currentFen: string;
   currentTurn: Color;

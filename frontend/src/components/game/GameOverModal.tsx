@@ -1,6 +1,7 @@
 "use client";
 import { GameResult, Color, GameSession } from "@/types/game";
 import { motion } from "framer-motion";
+import CountUp from "../ui/CountUp";
 
 export const GameOverModal = ({
   session,
@@ -18,6 +19,16 @@ export const GameOverModal = ({
     (session.result === GameResult.WHITE_WON && myColor === Color.BLACK) ||
     (session.result === GameResult.BLACK_WON && myColor === Color.WHITE);
   const isDraw = session.result === GameResult.DRAW;
+
+  const whiteDiff =
+    session.whitePlayerNewElo != null && session.whitePlayerOldElo != null
+      ? session.whitePlayerNewElo - session.whitePlayerOldElo
+      : null;
+
+  const blackDiff =
+    session.blackPlayerNewElo != null && session.blackPlayerOldElo != null
+      ? session.blackPlayerNewElo - session.blackPlayerOldElo
+      : null;
 
   let title = "Game Over";
   let titleColor = "text-white";
@@ -61,21 +72,71 @@ export const GameOverModal = ({
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-8 bg-white/5 border border-white/5 rounded-2xl p-6">
-          <div className="space-y-1 text-left">
+          <div className="space-y-1.5 text-left">
             <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-wider block">
               White Player
             </span>
-            <span className="text-sm font-semibold text-white block truncate">
+            <span className="text-base font-semibold text-white block truncate">
               {session.whitePlayerName || "Unknown"}
             </span>
+            {session.whitePlayerNewElo != null &&
+              session.whitePlayerOldElo != null && (
+                <div className="flex items-baseline gap-1.5 justify-start">
+                  <CountUp
+                    from={session.whitePlayerOldElo}
+                    to={session.whitePlayerNewElo}
+                    duration={1.25}
+                    direction={
+                      session.whitePlayerNewElo < session.whitePlayerOldElo
+                        ? "down"
+                        : "up"
+                    }
+                    className="font-mono text-sm font-semibold text-white/80"
+                  />
+                  {whiteDiff !== null && (
+                    <span
+                      className={`text-xs font-bold ${
+                        whiteDiff >= 0 ? "text-emerald-400" : "text-rose-500"
+                      }`}
+                    >
+                      {whiteDiff >= 0 ? `+${whiteDiff}` : whiteDiff}
+                    </span>
+                  )}
+                </div>
+              )}
           </div>
-          <div className="space-y-1 text-right">
+          <div className="space-y-1.5 text-right">
             <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-wider block">
               Black Player
             </span>
-            <span className="text-sm font-semibold text-white block truncate">
+            <span className="text-base font-semibold text-white block truncate">
               {session.blackPlayerName || "Unknown"}
             </span>
+            {session.blackPlayerNewElo != null &&
+              session.blackPlayerOldElo != null && (
+                <div className="flex items-baseline gap-1.5 justify-end">
+                  <CountUp
+                    from={session.blackPlayerOldElo}
+                    to={session.blackPlayerNewElo}
+                    duration={1.25}
+                    direction={
+                      session.blackPlayerNewElo < session.blackPlayerOldElo
+                        ? "down"
+                        : "up"
+                    }
+                    className="font-mono text-sm font-semibold text-white/80"
+                  />
+                  {blackDiff !== null && (
+                    <span
+                      className={`text-xs font-bold ${
+                        blackDiff >= 0 ? "text-emerald-400" : "text-rose-500"
+                      }`}
+                    >
+                      {blackDiff >= 0 ? `+${blackDiff}` : blackDiff}
+                    </span>
+                  )}
+                </div>
+              )}
           </div>
           <div className="col-span-2 border-t border-white/5 pt-4 flex justify-between items-center text-xs">
             <span className="text-[10px] font-semibold text-foreground/40 uppercase tracking-wider">
