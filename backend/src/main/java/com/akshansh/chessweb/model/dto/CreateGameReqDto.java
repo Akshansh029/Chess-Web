@@ -10,4 +10,5 @@ public class CreateGameReqDto {
     private UUID playerId;
     private String playerName;
     private Color playerColor;
+    private String timeControl;
 }

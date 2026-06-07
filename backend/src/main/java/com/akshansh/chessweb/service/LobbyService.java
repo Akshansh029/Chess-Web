@@ -29,6 +29,8 @@ public class LobbyService {
     public UUID createGame(CreateGameReqDto request){
         UserPrincipal currentUser = getCurrentUser();
 
+        String[] timeControlValues = request.getTimeControl().split("\\+");
+
         GameSession newSession = GameSession.builder()
                 .id(UUID.randomUUID())
                 .whitePlayerId(request.getPlayerColor().equals(Color.WHITE) ? currentUser.getUserId() : null)
@@ -39,6 +41,10 @@ public class LobbyService {
                 .currentTurn(Color.WHITE)
                 .currentFen(STARTING_FEN)
                 .status(GameStatus.WAITING)
+                .timeControl(request.getTimeControl())
+                .incrementMs(Integer.parseInt(timeControlValues[1]) * 1000)
+                .whiteTimeRemainingMs((long) Integer.parseInt(timeControlValues[0]) * 60 * 1000)
+                .blackTimeRemainingMs((long) Integer.parseInt(timeControlValues[0]) * 60 * 1000)
                 .build();
 
         store.saveGame(newSession);
@@ -66,6 +72,7 @@ public class LobbyService {
 
         session.setStatus(GameStatus.ACTIVE);
         session.setStartedAt(Instant.now());
+        session.setTurnStartedAt(Instant.now());
 
         messagingTemplate.convertAndSend(
                 "/topic/game." + session.getId(),

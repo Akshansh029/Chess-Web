@@ -1,6 +1,7 @@
 package com.akshansh.chessweb.service;
 
 import com.akshansh.chessweb.model.entity.GameSession;
+import com.akshansh.chessweb.model.entity.MoveDto;
 import com.akshansh.chessweb.model.entity.MoveRecord;
 import com.akshansh.chessweb.model.entity.User;
 import com.akshansh.chessweb.model.enums.Color;
@@ -50,10 +51,10 @@ class GamePersistenceServiceTest {
                 .startedAt(Instant.parse("2026-06-04T12:30:00Z"))
                 .result(GameResult.WHITE_WON)
                 .terminationReason(GameTerminationReason.CHECKMATE)
-                .moveRecordHistory(List.of(
-                        move(1, Color.WHITE, "e4"),
-                        move(1, Color.BLACK, "e5"),
-                        move(2, Color.WHITE, "Nf3")
+                .moveDtoHistory(List.of(
+                        moveDto(1, Color.WHITE, "e4"),
+                        moveDto(1, Color.BLACK, "e5"),
+                        moveDto(2, Color.WHITE, "Nf3")
                 ))
                 .build();
 
@@ -79,7 +80,7 @@ class GamePersistenceServiceTest {
                 .whitePlayerName("Alice \"The Queen\"")
                 .blackPlayerName("Bob\\Black")
                 .result(GameResult.DRAW)
-                .moveRecordHistory(List.of())
+                .moveDtoHistory(List.of())
                 .build();
 
         String pgn = ReflectionTestUtils.invokeMethod(service, "buildPgn", session);
@@ -94,8 +95,7 @@ class GamePersistenceServiceTest {
         GamePersistenceService service = new GamePersistenceService(gameRepository, moveRepository, userRepository);
         UUID whitePlayerId = UUID.randomUUID();
         UUID blackPlayerId = UUID.randomUUID();
-        MoveRecord staleMove = move(1, Color.WHITE, "e4");
-        staleMove.setId(42L);
+        MoveDto staleMove = moveDto(1, Color.WHITE, "e4");
 
         when(userRepository.findById(whitePlayerId)).thenReturn(Optional.of(user(whitePlayerId, "Alice")));
         when(userRepository.findById(blackPlayerId)).thenReturn(Optional.of(user(blackPlayerId, "Bob")));
@@ -112,7 +112,7 @@ class GamePersistenceServiceTest {
                 .terminationReason(GameTerminationReason.CHECKMATE)
                 .startedAt(Instant.parse("2026-06-04T12:30:00Z"))
                 .currentFen("final fen")
-                .moveRecordHistory(List.of(staleMove))
+                .moveDtoHistory(List.of(staleMove))
                 .build();
 
         service.persist(session);
@@ -123,13 +123,11 @@ class GamePersistenceServiceTest {
 
         List<MoveRecord> savedMoves = (List<MoveRecord>) movesCaptor.getValue();
         assertThat(savedMoves).hasSize(1);
-        assertThat(savedMoves.getFirst()).isNotSameAs(staleMove);
         assertThat(savedMoves.getFirst().getId()).isNull();
-        assertThat(staleMove.getId()).isEqualTo(42L);
     }
 
-    private static MoveRecord move(int moveNumber, Color color, String sanNotation) {
-        return MoveRecord.builder()
+    private static MoveDto moveDto(int moveNumber, Color color, String sanNotation) {
+        return MoveDto.builder()
                 .moveNumber(moveNumber)
                 .color(color)
                 .fromSquare("e2")

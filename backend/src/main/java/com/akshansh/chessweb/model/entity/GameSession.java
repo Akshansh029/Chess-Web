@@ -23,6 +23,11 @@ public class GameSession {
     private int blackPlayerNewElo;
     private int whitePlayerOldElo;
     private int blackPlayerOldElo;
+    private long whiteTimeRemainingMs;
+    private long blackTimeRemainingMs;
+    private Instant turnStartedAt;
+    private int incrementMs;
+    private String timeControl;
     private GameStatus status;
     private GameResult result;
     private GameTerminationReason terminationReason;

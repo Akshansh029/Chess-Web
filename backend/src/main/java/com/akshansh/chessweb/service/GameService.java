@@ -8,10 +8,12 @@ import com.akshansh.chessweb.model.enums.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 
 @Slf4j
@@ -28,6 +30,12 @@ public class GameService {
 
         GameSession session = gameStore.findById(request.getGameId())
                 .orElseThrow(() -> new GameNotFoundException(request.getGameId()));
+
+        long elapsedMs = Duration.between(session.getTurnStartedAt(), Instant.now()).toMillis();
+
+        long newTimeRemainingMs = request.getColor() == Color.WHITE ?
+                    session.getWhiteTimeRemainingMs() - elapsedMs + session.getIncrementMs()
+                    : session.getBlackTimeRemainingMs() - elapsedMs + session.getIncrementMs();
 
         // Check whether requester is part of the game
         if(!currentUser.getUserId().equals(session.getWhitePlayerId()) && !currentUser.getUserId().equals(session.getBlackPlayerId())){
@@ -71,19 +79,15 @@ public class GameService {
         session.setDrawOfferBy(null); // Any move declines the draw offer
 
         // Check if game over
-        if (result.isCheckmate() || result.isStalemate() || result.isInsufficientMaterial() || result.isRepetition()) {
-            GameTerminationReason terminationReason = GameTerminationReason.CHECKMATE;
-
-            if(result.isInsufficientMaterial()){
-                terminationReason = GameTerminationReason.INSUFFICIENT_MATERIAL;
-            } else if (result.isStalemate()) {
-                terminationReason = GameTerminationReason.STALEMATE;
-            } else if (result.isRepetition()){
-                terminationReason = GameTerminationReason.REPETITION;
-            }
+        if (result.isCheckmate() || result.isStalemate() || result.isInsufficientMaterial() || result.isRepetition() || newTimeRemainingMs <= 0) {
+            GameTerminationReason terminationReason = getTerminationReason(result, newTimeRemainingMs);
 
             session.setStatus(GameStatus.ENDED);
-            session.setResult(result.isCheckmate() ? request.getColor() == Color.WHITE ? GameResult.WHITE_WON : GameResult.BLACK_WON : GameResult.DRAW);
+            if (newTimeRemainingMs <= 0) {
+                session.setResult(request.getColor() == Color.WHITE ? GameResult.BLACK_WON : GameResult.WHITE_WON);
+            } else {
+                session.setResult(result.isCheckmate() ? request.getColor() == Color.WHITE ? GameResult.WHITE_WON : GameResult.BLACK_WON : GameResult.DRAW);
+            }
             session.setTerminationReason(terminationReason);
 
             // save the game session
@@ -94,6 +98,14 @@ public class GameService {
             // Free memory from game store
             gameStore.remove(session.getId().toString());
         }
+
+        // set new time remaining and turn started at
+        if (request.getColor() == Color.WHITE) {
+            session.setWhiteTimeRemainingMs(newTimeRemainingMs);
+        } else {
+            session.setBlackTimeRemainingMs(newTimeRemainingMs);
+        }
+        session.setTurnStartedAt(Instant.now());
 
         return session;
     }
@@ -185,5 +197,22 @@ public class GameService {
 
         session.setDrawOfferBy(null);
         return session;
+    }
+
+    private static @NonNull GameTerminationReason getTerminationReason(
+            MoveResult result, long newTimeRemainingMs
+    ) {
+        GameTerminationReason terminationReason = GameTerminationReason.CHECKMATE;
+
+        if(result.isInsufficientMaterial()){
+            terminationReason = GameTerminationReason.INSUFFICIENT_MATERIAL;
+        } else if (result.isStalemate()) {
+            terminationReason = GameTerminationReason.STALEMATE;
+        } else if (result.isRepetition()){
+            terminationReason = GameTerminationReason.REPETITION;
+        } else if (newTimeRemainingMs <= 0) {
+            terminationReason = GameTerminationReason.TIMEOUT;
+        }
+        return terminationReason;
     }
 }
