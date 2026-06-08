@@ -21,8 +21,6 @@ const Lobby: React.FC<LobbyProps> = ({ onJoinGame, onCreateGame }) => {
   const [selectedTimeControl, setSelectedTimeControl] =
     useState<string>("10+5");
 
-  const { toast } = useToast();
-
   const fetchGames = async () => {
     setLoading(true);
     try {

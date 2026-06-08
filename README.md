@@ -55,7 +55,6 @@ In a world full of bloated chess platforms, **Chess-Web** strips everything back
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) + React Context API
 - **Chess Board**: [react-chessboard](https://www.npmjs.com/package/react-chessboard) + [chess.js](https://github.com/jhlywa/chess.js)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/) + [GSAP](https://gsap.com/)
-- **WebGL Effects**: [OGL](https://ogl.dev/) (Light Rays background)
 - **WebSocket**: [@stomp/stompjs](https://stomp-js.github.io/) + [SockJS](https://github.com/sockjs/sockjs-client)
 - **Icons**: [Lucide React](https://lucide.dev/)
 
@@ -66,7 +65,6 @@ In a world full of bloated chess platforms, **Chess-Web** strips everything back
 - **Auth**: Spring Security + JWT (Access + Refresh Token rotation)
 - **WebSocket**: Spring WebSocket + STOMP messaging
 - **Chess Engine**: [chesslib](https://github.com/bhlangonijr/chesslib) (server-side move validation)
-- **Lichess Integration**: [Chariot](https://github.com/tors42/chariot) (Lichess API client)
 - **Database**: [PostgreSQL](https://www.postgresql.org/) + Spring Data JPA
 - **Migrations**: [Flyway](https://flywaydb.org/)
 - **Email**: [Resend](https://resend.com/) (transactional email delivery)

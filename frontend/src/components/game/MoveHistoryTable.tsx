@@ -10,7 +10,7 @@ export const MoveHistoryTable = ({
   moves: Move[];
   noBorder?: boolean;
 }) => {
-  const bottomRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Group moves into pairs (White / Black)
   const pairs = [];
@@ -30,8 +30,13 @@ export const MoveHistoryTable = ({
   }
 
   React.useEffect(() => {
-    // Auto-scroll to the latest move
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Auto-scroll to the latest move inside the container only
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [moves.length]);
 
   return (
@@ -45,7 +50,10 @@ export const MoveHistoryTable = ({
       <h4 className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40 border-b border-white/5 pb-2 mb-3">
         Strategic Record (SAN)
       </h4>
-      <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-y-auto pr-1 custom-scrollbar"
+      >
         <table className="w-full text-xs text-left border-collapse">
           <thead>
             <tr className="border-b border-white/5 text-[9px] font-semibold uppercase text-foreground/30 tracking-wider">
@@ -83,7 +91,6 @@ export const MoveHistoryTable = ({
             )}
           </tbody>
         </table>
-        <div ref={bottomRef} />
       </div>
     </div>
   );

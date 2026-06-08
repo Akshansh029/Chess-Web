@@ -93,6 +93,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [ws.connected, playerName, ws.sendJoin]);
 
+  // Sync playerColor automatically when the game session is loaded/updated
+  React.useEffect(() => {
+    if (ws.gameSession && playerId) {
+      if (ws.gameSession.whitePlayerId === playerId) {
+        setPlayerColor(Color.WHITE);
+      } else if (ws.gameSession.blackPlayerId === playerId) {
+        setPlayerColor(Color.BLACK);
+      }
+    }
+  }, [ws.gameSession, playerId]);
+
   return (
     <GameContext.Provider
       value={{

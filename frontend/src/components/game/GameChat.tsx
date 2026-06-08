@@ -8,7 +8,7 @@ import { Send } from "lucide-react";
 export const GameChat: React.FC = () => {
   const { messages, sendMessage, playerName } = useGame();
   const [inputText, setInputText] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +19,22 @@ export const GameChat: React.FC = () => {
   };
 
   useEffect(() => {
-    // Auto scroll to bottom
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Auto scroll to bottom of the messages container only
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages]);
 
   return (
     <div className="flex flex-col h-[280px] bg-transparent font-sans">
       {/* Messages List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 scrollbar-thin scrollbar-thumb-white/5">
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 scrollbar-thin scrollbar-thumb-white/5"
+      >
         {messages.map((msg, index) => {
           const isSystem =
             msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE;
@@ -79,7 +87,6 @@ export const GameChat: React.FC = () => {
             No communications yet
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Box */}

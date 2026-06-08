@@ -62,7 +62,7 @@ export const GameShell: React.FC<GameShellProps> = ({
               </Link>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 md:gap-6">
               {displayName && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
                   <div
@@ -78,9 +78,9 @@ export const GameShell: React.FC<GameShellProps> = ({
                 <div className="flex items-center gap-4">
                   <Link
                     href="/profile"
-                    className="hidden md:flex items-center gap-3 hover:opacity-90 group cursor-pointer"
+                    className="flex items-center gap-3 hover:opacity-90 group cursor-pointer"
                   >
-                    <div className="text-right">
+                    <div className="hidden md:block text-right">
                       <p className="text-[10px] font-medium text-foreground/30 uppercase tracking-wider group-hover:text-primary transition-colors">
                         {isAuthenticated ? "Player" : "Guest"}
                       </p>
