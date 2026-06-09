@@ -6,7 +6,17 @@ import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { GameShell } from "@/components/layout/GameShell";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Lock, Key, ChevronRight, AlertTriangle, ArrowLeft } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Key,
+  ChevronRight,
+  AlertTriangle,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -21,6 +31,7 @@ export default function RegisterPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +50,15 @@ export default function RegisterPage() {
       return;
     }
 
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(name.trim())) {
+      setError("Username can only contain letters, numbers, and underscores.");
+      toast.error(
+        "Username can only contain letters, numbers, and underscores.",
+      );
+      return;
+    }
+
     try {
       const sent = await sendVerificationCode(email);
       if (sent) {
@@ -48,7 +68,8 @@ export default function RegisterPage() {
       }
     } catch (err: any) {
       console.error(err);
-      const errMsg = err.message || "Failed to register or email already registered.";
+      const errMsg =
+        err.message || "Failed to register or email already registered.";
       setError(errMsg);
       toast.error(errMsg);
     }
@@ -75,7 +96,8 @@ export default function RegisterPage() {
       router.push("/lobby");
     } catch (err: any) {
       console.error(err);
-      const errMsg = err.message || "Invalid verification code. Please try again.";
+      const errMsg =
+        err.message || "Invalid verification code. Please try again.";
       setError(errMsg);
       toast.error(errMsg);
     }
@@ -110,13 +132,15 @@ export default function RegisterPage() {
 
           <div className="relative z-10 flex flex-col items-center mb-8 text-center">
             <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4 border border-primary/30 shadow-lg shadow-primary/10">
-               <User className="text-primary w-7 h-7" />
+              <User className="text-primary w-7 h-7" />
             </div>
             <h2 className="text-2xl font-light tracking-tight text-white">
               {step === 1 ? "Create Account" : "Verify Email"}
             </h2>
             <p className="text-foreground/40 text-xs font-normal mt-1">
-              {step === 1 ? "Enlist as a new strategist" : `Enter code sent to ${email}`}
+              {step === 1
+                ? "Enlist as a new strategist"
+                : `Enter code sent to ${email}`}
             </p>
           </div>
 
@@ -126,7 +150,7 @@ export default function RegisterPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-start gap-3 text-xs font-semibold relative z-10"
             >
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </motion.div>
           )}
@@ -137,7 +161,11 @@ export default function RegisterPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-start gap-3 text-xs font-semibold relative z-10"
             >
-              <svg viewBox="0 0 24 24" className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mt-0.5 shrink-0"
+                fill="currentColor"
+              >
                 <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,16.5H13V18H11V16.5M11,6H13V15H11V6Z" />
               </svg>
               <span>{infoMessage}</span>
@@ -203,14 +231,22 @@ export default function RegisterPage() {
                       <Lock size={16} />
                     </div>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-semibold placeholder:text-foreground/20 text-white text-sm"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-11 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-semibold placeholder:text-foreground/20 text-white text-sm"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
@@ -220,7 +256,10 @@ export default function RegisterPage() {
                   className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs border border-white mt-6 cursor-pointer"
                 >
                   {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <>
+                      <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                      Sending Code...
+                    </>
                   ) : (
                     <>
                       Send Verification Code
@@ -265,7 +304,10 @@ export default function RegisterPage() {
                   className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs border border-white mt-6 cursor-pointer"
                 >
                   {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <>
+                      <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                      Creating Account...
+                    </>
                   ) : (
                     <>
                       Confirm & Create Profile

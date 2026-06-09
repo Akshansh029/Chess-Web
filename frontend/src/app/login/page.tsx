@@ -6,7 +6,14 @@ import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { GameShell } from "@/components/layout/GameShell";
 import { motion } from "framer-motion";
-import { Lock, Mail, ChevronRight, AlertTriangle } from "lucide-react";
+import {
+  Lock,
+  Mail,
+  ChevronRight,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -17,6 +24,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +80,7 @@ export default function LoginPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-start gap-3 text-xs font-semibold relative z-10"
             >
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </motion.div>
           )}
@@ -107,14 +115,22 @@ export default function LoginPage() {
                   <Lock size={16} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-semibold placeholder:text-foreground/20 text-white text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-11 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-semibold placeholder:text-foreground/20 text-white text-sm"
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -124,7 +140,10 @@ export default function LoginPage() {
               className="w-full bg-white hover:bg-neutral-100 text-black font-semibold py-3.5 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs border border-white mt-6 cursor-pointer"
             >
               {isLoading ? (
-                <>Connecting...</>
+                <>
+                  <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                  Signing In...
+                </>
               ) : (
                 <>
                   Connect Session

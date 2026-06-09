@@ -158,6 +158,8 @@ public class AuthService {
                     Instant.now()
             );
 
+            // last login info saved
+            newUser.setLastLoginAt(Instant.now());
             userRepo.save(newUser);
 
             // Authenticate email and password
