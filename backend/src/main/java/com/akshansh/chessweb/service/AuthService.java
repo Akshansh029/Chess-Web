@@ -54,7 +54,7 @@ public class AuthService {
         String code = verificationCodeGenerator.generateVerificationCode();
 
         UserVerification userVerification = UserVerification.builder()
-                .email(email)
+                .email(email.trim())
                 .verificationCode(code)
                 .expiresAt(Instant.now().plus(2, ChronoUnit.MINUTES))
                 .build();
@@ -72,10 +72,10 @@ public class AuthService {
     public TokenResponse loginUser(@Valid LoginRequest request) {
         // Authenticate email and password
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getEmail().trim(), request.getPassword().trim())
         );
 
-        UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(request.getEmail());
+        UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(request.getEmail().trim());
 
         User savedUser = userRepo.findById(userDetails.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -151,9 +151,9 @@ public class AuthService {
             verificationRepo.deleteAll(userVerificationList);
 
             User newUser = new User(
-                    request.getName(),
-                    request.getEmail(),
-                    passwordEncoder.encode(request.getPassword()),
+                    request.getName().trim(),
+                    request.getEmail().trim(),
+                    passwordEncoder.encode(request.getPassword().trim()),
                     800,
                     Instant.now()
             );

@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     initAuth();
   }, []);
 
-  // Automatic silent refresh before token expires
+  // Refresh before token expires
   useEffect(() => {
     if (!accessToken) return;
 

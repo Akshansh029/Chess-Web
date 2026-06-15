@@ -6,6 +6,12 @@ import com.akshansh.chessweb.model.dto.LoginResponse;
 import com.akshansh.chessweb.model.dto.RegisterUserRequest;
 import com.akshansh.chessweb.model.dto.TokenResponse;
 import com.akshansh.chessweb.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,20 +34,21 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth Controller", description = "APIs for authentication")
 public class AuthController {
 
     private final AuthService authService;
 
 
-//    @Operation(summary = "Check user's email", description = "Check whether provided email is already registered or not")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "True",
-//                    content = @Content(schema = @Schema(implementation = Boolean.class))),
-//            @ApiResponse(responseCode = "400", description = "Invalid request body",
-//                    content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "400", description = "User already exists",
-//                    content = @Content(schema = @Schema()))
-//    })
+    @Operation(summary = "Check user's email", description = "Check whether provided email is already registered or not")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "True",
+                    content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body",
+                    content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "400", description = "User already exists",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping("/check-email")
     public ResponseEntity<Boolean> checkEmail(
             @RequestParam @NotBlank @NotNull String email
@@ -52,13 +59,13 @@ public class AuthController {
     }
 
 
-//    @Operation(summary = "Login the user", description = "Sign in the user and generate JWT token")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Login successfully",
-//                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-//            @ApiResponse(responseCode = "400", description = "Invalid request body",
-//                    content = @Content(schema = @Schema())),
-//    })
+    @Operation(summary = "Login the user", description = "Sign in the user and generate JWT token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successfully",
+                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body",
+                    content = @Content(schema = @Schema())),
+    })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(
             @Valid @RequestBody LoginRequest request,
@@ -71,7 +78,7 @@ public class AuthController {
                         .secure(true)
                         .path("/")
                         .maxAge(30 * 24 * 60 * 60) // 30 days
-                        .sameSite("None") // Required as frontend/backend are on different subdomains
+                        .sameSite("None")
                         .build();
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
@@ -90,17 +97,17 @@ public class AuthController {
                 .build());
     }
 
-//    @Operation(summary = "Generate new access token", description = "Generate new access token with the help of refresh token")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Login successfully",
-//                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-//            @ApiResponse(responseCode = "400", description = "RefreshToken not found",
-//                    content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "401", description = "Invalid token",
-//                    content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "404", description = "User not found",
-//                    content = @Content(schema = @Schema())),
-//    })
+    @Operation(summary = "Generate new access token", description = "Generate new access token with the help of refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successfully",
+                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "400", description = "RefreshToken not found",
+                    content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "401", description = "Invalid token",
+                    content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema())),
+    })
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshToken(
             HttpServletRequest request,
@@ -143,15 +150,15 @@ public class AuthController {
         );
     }
 
-//    @Operation(summary = "Register the user", description = "Register the user and add details in database")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "201", description = "User registered successfully",
-//                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-//            @ApiResponse(responseCode = "400", description = "Invalid request body",
-//                    content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "400", description = "User already exists",
-//                    content = @Content(schema = @Schema()))
-//    })
+    @Operation(summary = "Register the user", description = "Register the user and add details in database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User registered successfully",
+                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body",
+                    content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "400", description = "User already exists",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping("/register")
     public ResponseEntity<LoginResponse> registerAndVerify(
             @Valid @RequestBody RegisterUserRequest request,
@@ -183,11 +190,11 @@ public class AuthController {
             .build());
     }
 
-//    @Operation(summary = "Logout the user", description = "Delete refreshToken from database and clear browser cookies")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "204", description = "No Content",
-//                    content = @Content(schema = @Schema()))
-//    })
+    @Operation(summary = "Logout the user", description = "Delete refreshToken from database and clear browser cookies")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "No Content",
+                    content = @Content(schema = @Schema()))
+    })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             HttpServletRequest request,

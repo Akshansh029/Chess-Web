@@ -63,7 +63,7 @@ export const useWebSocket = () => {
   const subscribeToGame = useCallback(
     (gameId: string) => {
       if (clientRef.current?.connected) {
-        // Unsubscribe from previous game if any
+        // Unsubscribe from previous game
         if (subscriptionsRef.current.game) {
           subscriptionsRef.current.game.unsubscribe();
         }

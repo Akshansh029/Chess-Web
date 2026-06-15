@@ -1,6 +1,7 @@
 package com.akshansh.chessweb.controller;
 
 import com.akshansh.chessweb.model.entity.ChatMessage;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -8,6 +9,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@Tag(name = "Chat Controller", description = "Handler for chat feature")
 public class ChatController {
 
     @MessageMapping("/sendMessage")

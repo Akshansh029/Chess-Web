@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Color, GameSession, ChatMessage } from "@/types/game";
-import { v4 as uuidv4 } from "uuid";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useAuth } from "@/context/AuthContext";
 

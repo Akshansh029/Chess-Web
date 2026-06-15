@@ -4,6 +4,7 @@ import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.entity.UserPrincipal;
 import com.akshansh.chessweb.model.dto.*;
 import com.akshansh.chessweb.service.GameService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "Game Controller", description = "Handler for in-game operations")
 public class GameController {
 
     private final SimpMessagingTemplate messagingTemplate;
