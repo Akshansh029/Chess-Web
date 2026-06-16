@@ -1,6 +1,6 @@
 package com.akshansh.chessweb.service;
 
-import com.akshansh.chessweb.exception.ResourceNotFoundException;
+import com.akshansh.chessweb.exception.GameNotJoinableException;
 import com.akshansh.chessweb.model.entity.GameSession;
 import com.akshansh.chessweb.model.dto.CreateGameReqDto;
 import com.akshansh.chessweb.model.dto.JoinGameReqDto;
@@ -55,31 +55,38 @@ public class LobbyService {
     public GameSession joinGame(JoinGameReqDto request){
         UserPrincipal currentUser = getCurrentUser();
 
-        GameSession session = store.findById(request.getGameId())
-                .orElseThrow(() -> new ResourceNotFoundException("Game session not found"));
+        GameSession fetchedSession = store.withGameLock(request.getGameId(), session -> {
 
-        if(currentUser.getUserId().equals(session.getBlackPlayerId()) || currentUser.getUserId().equals(session.getWhitePlayerId())){
-                throw new IllegalArgumentException("Players cannot join game with themselves");
-        }
+            if(session.getStatus() != GameStatus.WAITING){
+                throw new GameNotJoinableException("Game is not joinable, try again");
+            }
 
-        if(request.getPlayerColor().equals(Color.BLACK)){
-            session.setBlackPlayerId(request.getPlayerId());
-            session.setBlackPlayerName(request.getPlayerName());
-        } else{
-            session.setWhitePlayerId(request.getPlayerId());
-            session.setWhitePlayerName(request.getPlayerName());
-        }
+            if(currentUser.getUserId().equals(session.getBlackPlayerId()) || currentUser.getUserId().equals(session.getWhitePlayerId())){
+                    throw new IllegalArgumentException("Players cannot join game with themselves");
+            }
 
-        session.setStatus(GameStatus.ACTIVE);
-        session.setStartedAt(Instant.now());
-        session.setTurnStartedAt(Instant.now());
+            if(request.getPlayerColor().equals(Color.BLACK)){
+                session.setBlackPlayerId(request.getPlayerId());
+                session.setBlackPlayerName(request.getPlayerName());
+            } else{
+                session.setWhitePlayerId(request.getPlayerId());
+                session.setWhitePlayerName(request.getPlayerName());
+            }
+
+            session.setStatus(GameStatus.ACTIVE);
+            session.setStartedAt(Instant.now());
+            session.setTurnStartedAt(Instant.now());
+
+            return session;
+        });
+
 
         messagingTemplate.convertAndSend(
-                "/topic/game." + session.getId(),
-                session
+                "/topic/game." + fetchedSession.getId(),
+                fetchedSession
         );
 
-        return session;
+        return fetchedSession;
     }
 
     public List<GameSession> getWaitingSessions(){

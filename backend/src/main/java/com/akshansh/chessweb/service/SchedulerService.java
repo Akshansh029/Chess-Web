@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -46,52 +47,59 @@ public class SchedulerService {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 1000L * 10)      // runs every 10 seconds
-    public void checkAbandonedGames(){
+    @Scheduled(fixedDelay = 1000L * 10)
+    public void checkAbandonedGames() {
         List<GameSession> activeGames = gameStore.findActiveGames();
 
-        for(GameSession session : activeGames){
-            long elapsedMs = Duration.between(session.getTurnStartedAt(), Instant.now()).toMillis();
-            if(session.getCurrentTurn() == Color.WHITE){
-                if(session.getWhiteTimeRemainingMs() - elapsedMs <= 0){
-
-                    session.setStatus(GameStatus.ENDED);
-                    session.setResult(GameResult.BLACK_WON);
-                    session.setTerminationReason(GameTerminationReason.TIMEOUT);
-
-                    // save the game session
-                    int[] eloResults = gamePersistenceService.persist(session);
-                    session.setWhitePlayerNewElo(eloResults[0]);
-                    session.setBlackPlayerNewElo(eloResults[1]);
-
-                    messagingTemplate.convertAndSend(
-                            "/topic/game." + session.getId(),
-                            session
-                    );
-
-                    gameStore.remove(session.getId().toString());
-                    log.info("event=whiteAbandonedGame userId={} gameId={}", session.getWhitePlayerId(), session.getId());
-                }
-            } else if (session.getCurrentTurn() == Color.BLACK) {
-                if(session.getBlackTimeRemainingMs() - elapsedMs <= 0){
-                    session.setStatus(GameStatus.ENDED);
-                    session.setResult(GameResult.WHITE_WON);
-                    session.setTerminationReason(GameTerminationReason.TIMEOUT);
-
-                    // save the game session
-                    int[] eloResults = gamePersistenceService.persist(session);
-                    session.setWhitePlayerNewElo(eloResults[0]);
-                    session.setBlackPlayerNewElo(eloResults[1]);
-
-                    messagingTemplate.convertAndSend(
-                            "/topic/game." + session.getId(),
-                            session
-                    );
-
-                    gameStore.remove(session.getId().toString());
-                    log.info("event=blackAbandonedGame userId={} gameId={}", session.getBlackPlayerId(), session.getId());
-                }
-            }
+        for (GameSession session : activeGames) {
+            checkAndHandleTimeout(session.getId());
         }
+    }
+
+    private void checkAndHandleTimeout(UUID gameId) {
+        GameSession snapshot = gameStore.withGameLock(gameId, session -> {
+
+            if (session.getStatus() != GameStatus.ACTIVE) {
+                return null;
+            }
+
+            long elapsed = Duration.between(session.getTurnStartedAt(), Instant.now()).toMillis();
+            long timeRemaining = session.getCurrentTurn() == Color.WHITE
+                    ? session.getWhiteTimeRemainingMs() - elapsed
+                    : session.getBlackTimeRemainingMs() - elapsed;
+
+            if (timeRemaining > 0) {
+                return null; // not timed out yet
+            }
+
+            session.setStatus(GameStatus.ENDED);
+            session.setTerminationReason(GameTerminationReason.TIMEOUT);
+            session.setResult(session.getCurrentTurn() == Color.WHITE
+                    ? GameResult.BLACK_WON
+                    : GameResult.WHITE_WON);
+
+            log.info("event=gameTimeout gameId={} losingColor={}",
+                    session.getId(), session.getCurrentTurn());
+
+            return session;
+        });
+
+        if (snapshot == null || snapshot.getStatus() != GameStatus.ENDED) {
+            return;
+        }
+
+        // save the game if ended
+        try {
+            int[] eloResults = gamePersistenceService.persist(snapshot);
+            snapshot.setWhitePlayerNewElo(eloResults[0]);
+            snapshot.setBlackPlayerNewElo(eloResults[1]);
+        } catch (Exception e) {
+            log.error("event=timeoutPersistFailed gameId={}", gameId, e);
+            return; // don't remove from store if persist failed
+        }
+
+        gameStore.remove(gameId.toString());
+
+        messagingTemplate.convertAndSend("/topic/game." + gameId, snapshot);
     }
 }
