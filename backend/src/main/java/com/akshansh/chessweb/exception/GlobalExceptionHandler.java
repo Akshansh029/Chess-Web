@@ -153,6 +153,44 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(GameNotActiveException.class)
+    public ResponseEntity<ErrorResponse> handleGameNotActive(GameNotActiveException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Game is not active",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        log.warn("Client error event=gameNotActive status=400 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                MDC.get("userId"),
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                MDC.get("requestId")
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GameNotJoinableException.class)
+    public ResponseEntity<ErrorResponse> handleGameNotJoinable(GameNotJoinableException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Game is not joinable",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        log.warn("Client error event=gameNotActive status=400 method={} uri={} userId={} errorType={} message=\"{}\" requestId={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                MDC.get("userId"),
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                MDC.get("requestId")
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleInvalidAuthentication(AuthenticationException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
